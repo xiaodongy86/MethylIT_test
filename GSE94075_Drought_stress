@@ -1,0 +1,261 @@
+GSE94075 Drought stress data
+
+library(MethylIT)
+library(devtools)
+
+# Prepare a list of GRanges with all chromosome from all the samples
+
+experiment.path = '/data/experiments/non-mackenzie/GSE94075/bismark'
+pattern = "GSM259.*_Unstressed.*CG.bed.bismark.cov.gz|GSM259.*_Mitotic.*CG.bed.bismark.cov.gz"
+samples_files = list.files( path = experiment.path, pattern = pattern, full.names = TRUE)
+samples_id = c("CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+samplesGR_CG <- readCounts2GRangesList(filenames = samples_files,
+                                       sample.id = samples_id,
+                                       columns = c(seqnames = 1, start = 2, mC = 5, uC = 6),
+                                       chromosomes = paste0("Chr", 1:5),
+                                       verbose = TRUE)
+save(samplesGR_CG, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CG")
+
+
+pattern = "GSM259.*_Unstressed.*CHG.bed.bismark.cov.gz|GSM259.*_Mitotic.*CHG.bed.bismark.cov.gz"
+samples_files = list.files( path = experiment.path, pattern = pattern, full.names = TRUE)
+samples_id = c("CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+samplesGR_CHG <- readCounts2GRangesList(filenames = samples_files,
+                                       sample.id = samples_id,
+                                       columns = c(seqnames = 1, start = 2, mC = 5, uC = 6),
+                                       chromosomes = paste0("Chr", 1:5),
+                                       verbose = TRUE)
+save(samplesGR_CHG, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CHG")
+
+
+pattern = "GSM259.*_Unstressed.*CHH.bed.bismark.cov.gz|GSM259.*_Mitotic.*CHH.bed.bismark.cov.gz"
+samples_files = list.files( path = experiment.path, pattern = pattern, full.names = TRUE)
+samples_id = c("CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+samplesGR_CHH <- readCounts2GRangesList(filenames = samples_files,
+                                        sample.id = samples_id,
+                                        columns = c(seqnames = 1, start = 2, mC = 5, uC = 6),
+                                        chromosomes = paste0("Chr", 1:5),
+                                        verbose = TRUE)
+save(samplesGR_CHH, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CHH")
+
+
+Ref_CG = poolFromGRlist(list(samplesGR_CG$CTR1, samplesGR_CG$CTR2, samplesGR_CG$CTR3), stat = "sum", num.cores = 12L)
+Ref_CHG = poolFromGRlist(list(samplesGR_CHG$CTR1, samplesGR_CHG$CTR2, samplesGR_CHG$CTR3), stat = "sum", num.cores = 12L)
+Ref_CHH = poolFromGRlist(list(samplesGR_CHH$CTR1, samplesGR_CHH$CTR2, samplesGR_CHH$CTR3), stat = "sum", num.cores = 12L)
+
+Ref0_CG = Ref_CG
+Ref0_CG$uC <- 0
+
+Ref0_CHG = Ref_CHG
+Ref0_CHG$uC <- 0
+
+Ref0_CHH = Ref_CHH
+Ref0_CHH$uC <- 0
+
+Ref_CG_mean = poolFromGRlist(list(samplesGR_CG$CTR1, samplesGR_CG$CTR2, samplesGR_CG$CTR3), stat = "mean", num.cores = 12L)
+Ref_CHG_mean = poolFromGRlist(list(samplesGR_CHG$CTR1, samplesGR_CHG$CTR2, samplesGR_CHG$CTR3), stat = "mean", num.cores = 12L)
+Ref_CHH_mean = poolFromGRlist(list(samplesGR_CHH$CTR1, samplesGR_CHH$CTR2, samplesGR_CHH$CTR3), stat = "mean", num.cores = 12L)
+
+
+
+IndivCG = list(samplesGR_CG$CTR1,
+               samplesGR_CG$CTR2,
+               samplesGR_CG$CTR3,
+               samplesGR_CG$STR1,
+               samplesGR_CG$STR2,
+               samplesGR_CG$STR3)
+names(IndivCG) <- c("CTR1", "CTR2","CTR3",
+                    "STR1", "STR2", "STR3")
+
+
+IndivCHG = list(samplesGR_CHG$CTR1,
+                samplesGR_CHG$CTR2,
+                samplesGR_CHG$CTR3,
+                samplesGR_CHG$STR1,
+                samplesGR_CHG$STR2,
+                samplesGR_CHG$STR3)
+names(IndivCHG) <- c("CTR1", "CTR2","CTR3",
+                     "STR1", "STR2", "STR3")
+
+
+IndivCHH = list(samplesGR_CHH$CTR1,
+                samplesGR_CHH$CTR2,
+                samplesGR_CHH$CTR3,
+                samplesGR_CHH$STR1,
+                samplesGR_CHH$STR2,
+                samplesGR_CHH$STR3)
+names(IndivCHH) <- c("CTR1", "CTR2","CTR3",
+                     "STR1", "STR2", "STR3")
+save.image("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run.RData")
+
+HD_CG = estimateDivergence(ref = Ref_CG, indiv = IndivCG, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CG, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_sum_cov10")
+HD_CHG = estimateDivergence(ref = Ref_CHG, indiv = IndivCHG, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CHG, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHG_sum_cov10")
+HD_CHH = estimateDivergence(ref = Ref_CHH, indiv = IndivCHH, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CHH, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_sum_cov10")
+
+HD_CG_0 = estimateDivergence(ref = Ref0_CG, indiv = IndivCG, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CG_0, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_sum_cov10_Ref0")
+HD_CHG_0 = estimateDivergence(ref = Ref0_CHG, indiv = IndivCHG, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CHG_0, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHG_sum_cov10_Ref0")
+HD_CHH_0 = estimateDivergence(ref = Ref0_CHH, indiv = IndivCHH, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CHH_0, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_sum_cov10_Ref0")
+
+HD_CG_mean = estimateDivergence(ref = Ref_CG_mean, indiv = IndivCG, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CG_mean, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_mean_cov10")
+HD_CHG_mean = estimateDivergence(ref = Ref_CHG_mean, indiv = IndivCHG, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CHG_mean, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHG_mean_cov10")
+HD_CHH_mean = estimateDivergence(ref = Ref_CHH_mean, indiv = IndivCHH, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
+save(HD_CHH_mean, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_mean_cov10")
+
+
+
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run.RData")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_sum_cov10")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHG_sum_cov10")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_sum_cov10")
+
+
+# non-linear fit to a weibull distribution model for ALL context
+nlms_CG = nonlinearFitDist(HD_CG, column = 9, num.cores = 12L, verbose = FALSE)
+PS_CG = getPotentialDIMP(LR = HD_CG, nlms = nlms_CG, div.col = 9, alpha = 0.05,
+                         tv.col = 7, tv.cut = 0.2)
+
+nlms_CHG = nonlinearFitDist(HD_CHG, column = 9, num.cores = 12L, verbose = FALSE)
+PS_CHG = getPotentialDIMP(LR = HD_CHG, nlms = nlms_CHG, div.col = 9, alpha = 0.05,
+                          tv.col = 7, tv.cut = 0.2)
+
+nlms_CHH = nonlinearFitDist(HD_CHH, column = 9, num.cores = 24L, verbose = FALSE)
+PS_CHH = getPotentialDIMP(LR = HD_CHH, nlms = nlms_CHH, div.col = 9, alpha = 0.05,
+                          tv.col = 7, tv.cut = 0.2)
+
+
+
+cutpoints = estimateCutPoint(LR = PS_CG, control.names = c( "CTR1", "CTR2", "CTR3"),
+                             treatment.names = c( "STR1", "STR2", "STR3"),
+                             div.col = 9, verbose = FALSE)
+cutpoints
+
+
+
+cutpoints_CHG = estimateCutPoint(LR = PS_CHG, control.names = c( "CTR1", "CTR2", "CTR3"),
+                                 treatment.names = c( "STR1", "STR2", "STR3"),
+                                 div.col = 9, verbose = FALSE)
+cutpoints_CHG
+
+
+cutpoints_CHH = estimateCutPoint(LR = PS_CHH, control.names = c( "CTR1", "CTR2", "CTR3"),
+                                 treatment.names = c( "STR1", "STR2", "STR3"),
+                                 div.col = 9, verbose = FALSE)
+cutpoints_CHH
+
+
+DIMPs_CG  = selectDIMP(PS_CG, div.col = 9, cutpoint = 1.1104091  )
+DIMPs_CHG = selectDIMP(PS_CHG, div.col = 9, cutpoint = 1.1104091  )
+DIMPs_CHH = selectDIMP(PS_CHH, div.col = 9, cutpoint = 1.1104091  )
+
+
+seqnames(DIMPs_CG$CTR1)
+seqnames(DIMPs_CG$CTR2)
+seqnames(DIMPs_CG$CTR3)
+seqnames(DIMPs_CG$STR1)
+seqnames(DIMPs_CG$STR2)
+seqnames(DIMPs_CG$STR3)
+
+
+
+DIMPs_CTR1 = c(DIMPs_CG$CTR1, DIMPs_CHG$CTR1, DIMPs_CHH$CTR1)
+DIMPs_CTR2 = c(DIMPs_CG$CTR2, DIMPs_CHG$CTR2, DIMPs_CHH$CTR2)
+DIMPs_CTR3 = c(DIMPs_CG$CTR3, DIMPs_CHG$CTR3, DIMPs_CHH$CTR3)
+DIMPs_STR1 = c(DIMPs_CG$STR1, DIMPs_CHG$STR1, DIMPs_CHH$STR1)
+DIMPs_STR2 = c(DIMPs_CG$STR2, DIMPs_CHG$STR2, DIMPs_CHH$STR2)
+DIMPs_STR3 = c(DIMPs_CG$STR3, DIMPs_CHG$STR3, DIMPs_CHH$STR3)
+
+DIMPs= list(CTR1=DIMPs_CTR1, CTR2=DIMPs_CTR2, CTR3=DIMPs_CTR3,
+            STR1=DIMPs_STR1, STR2=DIMPs_STR2, STR3=DIMPs_STR3)
+
+
+suppressMessages(library(DESeq2))
+suppressMessages(library(rtracklayer))
+
+
+AG = import("/data/TAIR10_gff3/Arabidopsis_thaliana.TAIR10.38.gtf.gz")
+gene = AG[ AG$type == "gene", c( "gene_id", "gene_biotype" ) ]
+gene = gene[ gene$gene_biotype == "protein_coding", "gene_id" ]
+seqlevels(gene, pruning.mode = "coarse") <- c("1", "2", "3", "4", "5")
+seqlevels(gene)<- paste0("Chr", 1:5)
+gene = sortBySeqnameAndStart(gene)
+
+# > x = DIMPs_CTR1$TV
+# > x[ x > 0 ] <-"hyper.methylated"
+# > x[ x < 0 ] <-"hypo.methylated"
+# > table(x)
+
+#======== DIMPs at gene region
+DIMPs_CTR1_gene = getDIMPatGenes(GR = DIMPs$CTR1, GENES = gene)
+DIMPs_CTR2_gene = getDIMPatGenes(GR = DIMPs$CTR2, GENES = gene)
+DIMPs_CTR3_gene = getDIMPatGenes(GR = DIMPs$CTR3, GENES = gene)
+DIMPs_STR1_gene = getDIMPatGenes(GR = DIMPs$STR1, GENES = gene)
+DIMPs_STR2_gene = getDIMPatGenes(GR = DIMPs$STR2, GENES = gene)
+DIMPs_STR3_gene = getDIMPatGenes(GR = DIMPs$STR3, GENES = gene)
+
+
+Genes_DIMPs = uniqueGRanges(list( DIMPs_CTR1_gene[, 2], DIMPs_CTR2_gene[, 2], DIMPs_CTR3_gene[, 2], 
+                                  DIMPs_STR1_gene[, 2], DIMPs_STR2_gene[, 2], DIMPs_STR3_gene[, 2])
+                            , type = "equal", verbose = TRUE,
+                            chromosomes = c("Chr1", "Chr2", "Chr3", "Chr4", "Chr5"),
+                            ignore.strand = TRUE )
+
+colnames( mcols(Genes_DIMPs)) <- c("CTR1", 
+                                   "CTR2",
+                                   "CTR3", 
+                                   "STR1",
+                                   "STR2",
+                                   "STR3")
+
+Genes_DIMPs_ID = subsetByOverlaps(gene, Genes_DIMPs, type = "equal",
+                                  ignore.strand = FALSE)
+
+dmps = data.frame( mcols( Genes_DIMPs ) )
+dmps = apply( dmps, 2, as.numeric )
+rownames(dmps) <- Genes_DIMPs_ID$gene_id
+
+# experiment design
+condition = data.frame(condition = factor(c("CT", "CT", "CT",
+                                            "TT", "TT", "TT"),
+                                          levels = c("CT", "TT")))
+
+rownames(condition) <- c("CTR1", "CTR2", "CTR3", "STR1", "STR2","STR3")
+DIMR <- DESeqDataSetFromMatrix(countData = dmps,
+                               colData = condition,
+                               design = formula( ~ condition ),
+                               rowRanges = Genes_DIMPs)
+
+
+DMGs = countTest( DIMR, num.cores = 12L, minCountPerIndv = 4, countFilter = TRUE, 
+                  CountPerBp = 0.002, Minlog2FC = 1, pvalCutOff = 0.05, MVrate = .95 )
+DMGs
+
+
+write.csv( DMGs, file ="/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DMGs_Ctrlasref_Cov10_sum_2.csv",
+           row.names = ROWNAMES(DMGs), quote = FALSE)
+
+save.image (file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_sum_cov10")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_sum_cov10")
+
+
+
+ABA_pathway_gene <- read.csv(file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/ABA_pathway_gene.csv" ,head = TRUE)
+DMGs_ABA_pathway_gene <- DMGs[ na.omit(match(as.character(ABA_pathway_gene$Gene_ID), names(DMGs)))]
+
+write.csv( DMGs_ABA_pathway_gene, file ="/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DMGs_ABA_pathway_gene.csv",
+           row.names = ROWNAMES(DMGs_ABA_pathway_gene), quote = FALSE)
+
+
+
+
+
+
+
+
