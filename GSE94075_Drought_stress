@@ -1,4 +1,3 @@
-GSE94075 Drought stress data
 
 library(MethylIT)
 library(devtools)
@@ -15,6 +14,44 @@ samplesGR_CG <- readCounts2GRangesList(filenames = samples_files,
                                        chromosomes = paste0("Chr", 1:5),
                                        verbose = TRUE)
 save(samplesGR_CG, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CG")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CG")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CHH")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CHG")
+
+
+#### compute the total methylation level 
+sum(samplesGR_CG$CTR1$mC)/sum(samplesGR_CG$CTR1$mC+samplesGR_CG$CTR1$uC)
+sum(samplesGR_CHG$CTR1$mC)/sum(samplesGR_CHG$CTR1$mC+samplesGR_CHG$CTR1$uC)
+sum(samplesGR_CHH$CTR1$mC)/sum(samplesGR_CHH$CTR1$mC+samplesGR_CHH$CTR1$uC)
+
+sum(samplesGR_CG$CTR2$mC)/sum(samplesGR_CG$CTR2$mC+samplesGR_CG$CTR2$uC)
+sum(samplesGR_CHG$CTR2$mC)/sum(samplesGR_CHG$CTR2$mC+samplesGR_CHG$CTR2$uC)
+sum(samplesGR_CHH$CTR2$mC)/sum(samplesGR_CHH$CTR2$mC+samplesGR_CHH$CTR2$uC)
+
+sum(samplesGR_CG$CTR3$mC)/sum(samplesGR_CG$CTR3$mC+samplesGR_CG$CTR3$uC)
+sum(samplesGR_CHG$CTR3$mC)/sum(samplesGR_CHG$CTR3$mC+samplesGR_CHG$CTR3$uC)
+sum(samplesGR_CHH$CTR3$mC)/sum(samplesGR_CHH$CTR3$mC+samplesGR_CHH$CTR3$uC)
+
+
+
+sum(samplesGR_CG$STR1$mC)/sum(samplesGR_CG$STR1$mC+samplesGR_CG$STR1$uC) 
+sum(samplesGR_CHG$STR1$mC)/sum(samplesGR_CHG$STR1$mC+samplesGR_CHG$STR1$uC)
+sum(samplesGR_CHH$STR1$mC)/sum(samplesGR_CHH$STR1$mC+samplesGR_CHH$STR1$uC)
+
+sum(samplesGR_CG$STR2$mC)/sum(samplesGR_CG$STR2$mC+samplesGR_CG$STR2$uC) 
+sum(samplesGR_CHG$STR2$mC)/sum(samplesGR_CHG$STR2$mC+samplesGR_CHG$STR2$uC)
+sum(samplesGR_CHH$STR2$mC)/sum(samplesGR_CHH$STR2$mC+samplesGR_CHH$STR2$uC)
+
+sum(samplesGR_CG$STR3$mC)/sum(samplesGR_CG$STR3$mC+samplesGR_CG$STR3$uC) 
+sum(samplesGR_CHG$STR3$mC)/sum(samplesGR_CHG$STR3$mC+samplesGR_CHG$STR3$uC)
+sum(samplesGR_CHH$STR3$mC)/sum(samplesGR_CHH$STR3$mC+samplesGR_CHH$STR3$uC)
+
+
+
+DIMPs_CTR1_gene = getDIMPatGenes(GR = DIMPs$CTR1, GENES = gene)
+
+
+
 
 
 pattern = "GSM259.*_Unstressed.*CHG.bed.bismark.cov.gz|GSM259.*_Mitotic.*CHG.bed.bismark.cov.gz"
@@ -37,6 +74,8 @@ samplesGR_CHH <- readCounts2GRangesList(filenames = samples_files,
                                         chromosomes = paste0("Chr", 1:5),
                                         verbose = TRUE)
 save(samplesGR_CHH, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/samplesGR_CHH")
+
+
 
 
 Ref_CG = poolFromGRlist(list(samplesGR_CG$CTR1, samplesGR_CG$CTR2, samplesGR_CG$CTR3), stat = "sum", num.cores = 12L)
@@ -109,12 +148,18 @@ save(HD_CHG_mean, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/
 HD_CHH_mean = estimateDivergence(ref = Ref_CHH_mean, indiv = IndivCHH, Bayesian = TRUE, min.coverage = 10, high.coverage = 300, percentile = 0.999, num.cores = 12L, task = 0L,verbose = FALSE)
 save(HD_CHH_mean, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_mean_cov10")
 
-
-
 load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run.RData")
 load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_sum_cov10")
 load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHG_sum_cov10")
 load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_sum_cov10")
+
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_mean_cov10")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHG_mean_cov10")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_mean_cov10")
+
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_sum_cov10_Ref0")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHG_sum_cov10_Ref0")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CHH_sum_cov10_Ref0")
 
 
 # non-linear fit to a weibull distribution model for ALL context
@@ -151,9 +196,47 @@ cutpoints_CHH = estimateCutPoint(LR = PS_CHH, control.names = c( "CTR1", "CTR2",
 cutpoints_CHH
 
 
-DIMPs_CG  = selectDIMP(PS_CG, div.col = 9, cutpoint = 1.1104091  )
-DIMPs_CHG = selectDIMP(PS_CHG, div.col = 9, cutpoint = 1.1104091  )
-DIMPs_CHH = selectDIMP(PS_CHH, div.col = 9, cutpoint = 1.1104091  )
+DIMPs_CG  = selectDIMP(PS_CG, div.col = 9, cutpoint = 1.2)
+DIMPs_CHG = selectDIMP(PS_CHG, div.col = 9, cutpoint = 1.2)
+DIMPs_CHH = selectDIMP(PS_CHH, div.col = 9, cutpoint = 1.2)
+
+
+#DIMPs classification pca.qda
+conf.mat <- evaluateDIMPclass(DIMPs_CG,
+                              column = c(hdiv = TRUE, TV = TRUE, wprob = TRUE, pos = TRUE),
+                              classifier = "pca.qda", n.pc = 4, 
+                              center = TRUE, scale = TRUE,
+                              control.names = c("CTR1", "CTR2", "CTR3"),
+                              treatment.names = c("STR1", "STR2", "STR3"),
+                              output = "conf.mat", prop = 0.6)
+
+conf.mat$conf.mat
+
+#Confusion Matrix and Statistics
+
+#Reference
+#Prediction     CT     TT
+#CT  70436      0
+#TT   1815 194590
+
+#Accuracy : 0.9932          
+#95% CI : (0.9929, 0.9935)
+#No Information Rate : 0.7292          
+#P-Value [Acc > NIR] : < 2.2e-16       
+
+#Kappa : 0.9826          
+#Mcnemar's Test P-Value : < 2.2e-16       
+#                                          
+#            Sensitivity : 1.0000          
+#            Specificity : 0.9749          
+#         Pos Pred Value : 0.9908          
+#         Neg Pred Value : 1.0000          
+#             Prevalence : 0.7292          
+#         Detection Rate : 0.7292          
+#   Detection Prevalence : 0.7360          
+#      Balanced Accuracy : 0.9874          
+#                                          
+#       'Positive' Class : TT              
 
 
 seqnames(DIMPs_CG$CTR1)
@@ -162,8 +245,6 @@ seqnames(DIMPs_CG$CTR3)
 seqnames(DIMPs_CG$STR1)
 seqnames(DIMPs_CG$STR2)
 seqnames(DIMPs_CG$STR3)
-
-
 
 DIMPs_CTR1 = c(DIMPs_CG$CTR1, DIMPs_CHG$CTR1, DIMPs_CHH$CTR1)
 DIMPs_CTR2 = c(DIMPs_CG$CTR2, DIMPs_CHG$CTR2, DIMPs_CHH$CTR2)
@@ -238,10 +319,10 @@ DMGs = countTest( DIMR, num.cores = 12L, minCountPerIndv = 4, countFilter = TRUE
 DMGs
 
 
-write.csv( DMGs, file ="/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DMGs_Ctrlasref_Cov10_sum_2.csv",
+write.csv( DMGs, file ="/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/(6321)DMGs_Ctrlasref_Cov10_sum_2.csv",
            row.names = ROWNAMES(DMGs), quote = FALSE)
 
-save.image (file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_sum_cov10")
+save.image (file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_4_9_2018")
 load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_sum_cov10")
 
 
@@ -253,6 +334,533 @@ write.csv( DMGs_ABA_pathway_gene, file ="/data/users/xzy50/GSE94075/ControlAsRef
            row.names = ROWNAMES(DMGs_ABA_pathway_gene), quote = FALSE)
 
 
+######################################################################## #
+#
+##### -------------- NETWORK BASES ENRICHMENT ANALYSIS ---------- #######
+#
+######################################################################## #
+library(EnrichmentBrowser)
+library(GenomicRanges)
+library(data.table )
+setwd( "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/" )
+
+DMGs <- read.csv( "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/(6321)DMGs_Ctrlasref_Cov10_sum_2.csv", header = TRUE )
+DMG = DMGs[ , c( "log2FC", "adj.pval" ) ]
+colnames( DMG ) <- c( "FC", "ADJ.PVAL" )
+rownames( DMG ) <- DMGs$X 
+
+###################################################################### #
+#
+##### ***** ESET Object. Reading expression data from file ****** ######
+#
+###################################################################### #
+# *** Counts corresponding to DEGs ***
+#exp2#
+x = DMGs[ , c( "CTR1", "CTR2", "CTR3", "STR1", "STR2","STR3") ]
+rownames( x ) <- DMGs$X 
+cnames = c( "CTR1", "CTR2", "CTR3", "STR1", "STR2","STR3" )
+
+# ExpressionSet object
+eset.DR <- new("ExpressionSet", exprs = as.matrix(x), annotation = "ath")
+fData(eset.DR) <- DMG
+GROUP = c( 0, 0, 0, 1, 1, 1 )
+grps = data.frame(cnames, GROUP, row.names = 1)
+pData(eset.DR) <- grps
+annotation(eset.DR)
+
+# ============= KEGG datasets ============
+kegg.gs <- get.kegg.genesets( "ath" )
+str(head(kegg.gs))
+
+# GO terms of a selected ontology as gene sets
+# ontology of interest (BP, MF or CC):
+# BP: Biological Process
+# MF: Molecular Function
+# CC: Cellular Component
+ath.bp.gs <- get.go.genesets(org = "ath", onto = "BP", mode = "GO.db")
+str(head(ath.bp.gs))
+
+ath.mf.gs <- get.go.genesets( org = "ath", onto = "MF", mode = "GO.db" )
+str(head(ath.mf.gs))
+
+ath.cc.gs <- get.go.genesets( org = "ath", onto = "CC", mode = "GO.db" )
+str(head(ath.cc.gs))
+
+#### *** Compilation of a gene regulatory network from KEGG pathways (already
+#### done) !!!
+outfile = "/data/TAIR10_gff3/KEGG/"
+ath.grn <- compile.grn.from.kegg(paste(outfile, "ath.zip", sep = "" ) )
+head(ath.grn)
+#      FROM        TO          TYPE
+# [1,] "AT1G48970" "AT1G04170" "+" 
+# [2,] "AT1G48970" "AT2G18720" "+" 
+# [3,] "AT1G48970" "AT2G40290" "+" 
+# [4,] "AT1G48970" "AT3G07920" "+" 
+# [5,] "AT1G48970" "AT5G01940" "+" 
+# [6,] "AT1G48970" "AT5G05470" "+"
+######################################################################## #
+#
+# ***** GGEA graphs of consistency between regulation and expression *****
+#
+# Network-based enrichment analysis (NBEA)
+#
+######################################################################## #
+
+#### ========== BP: Biological Process ===================== #####
+nbea.bp.ggea <- nbea(method ="ggea", eset = eset.DR, gs = ath.bp.gs, 
+                     grn = ath.grn, perm = 10^6, alpha = 0.05, beta = 1,
+                     cons.thresh = 0.1)
+
+nbea.bp.ggea_new <- data.frame(gs.ranking(nbea.bp.ggea))
+
+write.csv(nbea.bp.ggea_new, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/nbea.bp.ggea_4_9.csv" )
+
+#                                                                              GENE.SET NR.RELS RAW.SCORE NORM.SCORE P.VALUE
+# 1  GO:0009862_systemic_acquired_resistance,_salicylic_acid_mediated_signaling_pathway      17        17          1   1e-06
+# 2                                                        GO:0009733_response_to_auxin      13        13          1   1e-06
+# 3                                            GO:0006612_protein_targeting_to_membrane      11        11          1   1e-06
+# 4                                                  GO:0009651_response_to_salt_stress      11        11          1   1e-06
+# 5                         GO:0010363_regulation_of_plant-type_hypersensitive_response      11        11          1   1e-06
+# 6                                  GO:0031348_negative_regulation_of_defense_response      11        11          1   1e-06
+# 7                                            GO:0042742_defense_response_to_bacterium      11        11          1   1e-06
+# 8                               GO:0006355_regulation_of_transcription,_DNA-templated      10        10          1   1e-06
+# 9                                                    GO:0009617_response_to_bacterium      10        10          1   1e-06
+# 10                            GO:0043069_negative_regulation_of_programmed_cell_death      10        10          1   1e-06
+# 11                                              GO:0050832_defense_response_to_fungus      10        10          1   1e-06
+# 12                                         GO:0009410_response_to_xenobiotic_stimulus       9         9          1   1e-06
+# 13                               GO:0009863_salicylic_acid_mediated_signaling_pathway       9         9          1   1e-06
+# 14                         GO:0030968_endoplasmic_reticulum_unfolded_protein_response       9         9          1   1e-06
+# 15                                              GO:0006970_response_to_osmotic_stress       8         8          1   1e-06
+# 16                                                        GO:0009409_response_to_cold       7         7          1   1e-06
+# 17                                GO:0009867_jasmonic_acid_mediated_signaling_pathway       7         7          1   1e-06
+# 18                                                            GO:0000165_MAPK_cascade       6         6          1   1e-06
+# 19                                     GO:0009697_salicylic_acid_biosynthetic_process       6         6          1   1e-06
+# 20                                                    GO:0009723_response_to_ethylene       5         5          1   1e-06
+# 21                                    GO:0009873_ethylene-activated_signaling_pathway       5         5          1   1e-06
+# 22                                                        GO:0007623_circadian_rhythm       3         3          1   1e-06
+# 23                                               GO:0009737_response_to_abscisic_acid       3         3          1   1e-06
+
+# ================== Gene list ===================== #####
+source( "/data/R_functions/GGEAgraph2.R" )
+library(Rgraphviz)
+
+sig.bp.ggea = gs.ranking(nbea.bp.ggea)$GENE.SET
+pathw = gsub( "_", " ", sig.bp.ggea )
+
+# ===== To get a network graph ====== #
+k = 22
+p = GGEAgraph(
+  gs = ath.bp.gs[[ sig.bp.ggea[ k ] ]],
+  grn = ath.grn, eset = eset.DR,
+  title = pathw[ k ],
+  cons.thresh = 0.2)
+
+# ======= To get the list of genes ====== #
+genes = c()
+for (k in 1:24 ) {
+  cat( "processing", pathw[k], "\n" )
+  p = GGEAgraph(
+    gs = ath.bp.gs[[ sig.bp.ggea[ k ] ]],
+    grn = ath.grn, eset = eset.DR,
+    title = "" )
+  genes = rbind( genes,
+                 data.frame( Genes = names( p@renderInfo@nodes$label ),
+                             Alias = p@renderInfo@nodes$label, GO = sig.bp.ggea[ k ] ) )
+}
+
+#### ========================= KEGG gene sets ======================= #####
+nbea.kegg.ggea <- nbea(method ="ggea", eset = eset.DR, gs = kegg.gs, 
+                       grn = ath.grn, perm = 10^6, alpha = 0.05, beta = 1.1, cons.thresh = 0.1)
+data.frame(gs.ranking(nbea.kegg.ggea, signif.only = TRUE))
+#                                     GENE.SET NR.RELS RAW.SCORE NORM.SCORE P.VALUE
+# 1        ath04626_Plant-pathogen_interaction      53        53          1   1e-06
+# 2 ath04075_Plant_hormone_signal_transduction      49        49          1   1e-06
+# 3            ath04016_MAPK_signaling_pathway      27        27          1   1e-06
+# 4                     ath03013_RNA_transport      15        15          1   1e-06
+# 5                         ath04136_Autophagy       7         7          1   1e-06
+# 6                  ath04712_Circadian_rhythm       3         3          1   1e-06
+sig.kegg.ggea = gs.ranking(nbea.bp.ggea)$GENE.SET
+
+genes.kegg = c()
+for (k in 1:6 ) {
+  cat( "processing", sig.kegg.ggea[ k ], "\n" )
+  p = GGEAgraph(
+    gs = kegg.gs[[ sig.kegg.ggea[ k ] ]],
+    grn = ath.grn, eset = eset.DR,
+    title = "" )
+  genes.kegg = rbind(genes.kegg,
+                     data.frame(Genes = names(p@renderInfo@nodes$label),
+                                Alias = p@renderInfo@nodes$label,
+                                KEGG.ID = sig.kegg.ggea[ k ] ) )
+}
+
+
+save(genes, genes.kegg, file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/genes_in_networks.RData")
+save.image("/data/users/xzy50/msh1_stress/NBEA.RData")
+
+
+
+#########################################################################################
+#
+# --------------- Network Enrichment Analysis Test . Based on NETWORK -----------------------
+#
+#########################################################################################
+# Compute NEAT (Signorelli et al., 2016) with small correction, a test for network enrichment
+# analysis between/from a first list of sets ('A sets') and/to a second list of sets ('B sets').
+# neat is the R package that implements NEAT, the Network Enrichment Analysis Test which is 
+# presented in Signorelli, M., Vinciotti, V., Wit, E. C. (2016). NEAT: an efficient network 
+# enrichment analysis test. BMC Bioinformatics, 17:352.
+
+library( neat ) # https://cran.r-project.org/web/packages/neat/vignettes/neat.html
+source( "/data/R_functions/.neat.R" )
+ATn = rownames( DEG )
+
+# ath.grn <- compile.grn.from.kegg( "/JOB/Work/KEGG/ath.zip" )
+# head( ath.grn )
+genesNet = unique( as.vector( ath.grn[ , 1:2 ] ) ) 
+
+test = .neat( alist = list('AT.DEG' = ATn ), blist = kegg.gs, network = ath.grn[ , 1:2 ],
+              nettype = 'directed', nodes = genesNet, alpha = 0.05 )
+sum( test$pvalue <= 0.05 )
+# ntest = test[ , ]
+ntest = test[( test$nab > 0 & test$pvalue <= 0.05 ), ]
+ntest = ntest[ (ntest$conclusion == "Overenrichment" ), ]
+
+NetAB = kegg.gs[ match( as.character( ntest$B ), names( kegg.gs ) ) ]
+GeneNet = sapply( as.list( NetAB ), function(s) s[ na.omit( match( ATn, s ) ) ] ) 
+
+Netw = names( GeneNet )
+GenesNet = c()
+for( k in 1:length( GeneNet ) ) {
+  if( length( GeneNet[[ k ]]) > 0 ) 
+    GenesNet = rbind( GenesNet, data.frame( GeneID = GeneNet[[ k ]], Network = Netw[ k ] ) )
+}
+
+GenesNet = data.table( GenesNet )
+GenesNets = GenesNet[ , list( Network = list( unique( as.character( Network ) ) ) ), by = GeneID ]
+DEGlist = rownames( DEG )
+
+save( GenesNet, GenesNets, DEGlist,
+      file = "/JOB/Work/Translatome/NBEA/NEAT_translatome_WT&IP_NET.RData" )
+write.csv( GenesNet,
+           file = "/JOB/Work/Translatome/NBEA/NEAT_translatome_WT&IP_NET.csv", row.names = F )
+write.matrix( GenesNets,
+              file = "/JOB/Work/Translatome/NBEA/NEAT_translatome_WT&IP_NETs.csv", sep = "," )
+
+
+
+#########################################################################################
+#
+# --------------- Network Enrichment Analysis Test . Based on GO -----------------------
+#
+#########################################################################################
+# Compute NEAT (Signorelli et al., 2016) with small correction, a test for network enrichment
+# analysis between/from a first list of sets ('A sets') and/to a second list of sets ('B sets').
+# neat is the R package that implements NEAT, the Network Enrichment Analysis Test which is 
+# presented in Signorelli, M., Vinciotti, V., Wit, E. C. (2016). NEAT: an efficient network 
+# enrichment analysis test. BMC Bioinformatics, 17:352.
+
+library( neat ) # https://cran.r-project.org/web/packages/neat/vignettes/neat.html
+source( "/JOB/Work/R_functions/.neat.R" )
+# ATH_GOs <- read.delim("/media/robersy/OS/Users/Robersy/Documents/Work/TAIR10_gff3/GOs/ATH_GO_GOSLIM.txt", header = FALSE)
+# # ATH_GOs <- read.delim("C:/Users/Robersy/Documents/Work/TAIR10_gff3/GOs/ATH_GO_GOSLIM.txt", header = FALSE)
+# ATH_GOs = data.table( ATH_GOs )
+# colnames( ATH_GOs ) <- c( "locus", "TAIR.accession", "object.name", "relationship.type", "GO.term", "GO.ID",
+#                           "TAIR.Keyword.ID", "Aspect", "GOslim term", "Evidence.code", "Evidence.description", 
+#                           "Evidence with", "Reference", "Annotator", "Date.annotated" )
+# 
+# # *** To build custom annotations ****
+# locus = ATH_GOs$locus
+# GOs = paste0( ATH_GOs$GO.ID, "_", ATH_GOs$GO.term )
+# GO2Genes = by( locus, GOs, function(s) unique( as.character(s) ), simplify = T )
+# GO2Genes = GO2Genes[1:length(GO2Genes)]
+ATn = rownames( DEG )
+
+# ath.grn <- compile.grn.from.kegg( "/JOB/Work/KEGG/ath.zip" )
+# head( ath.grn )
+genesNet = unique( as.vector( ath.grn[ , 1:2 ] ) ) 
+
+test = .neat( alist = list('AT.DEG' = ATn ), blist = ath.bp.gs, network = ath.grn[ , 1:2 ],
+              nettype = 'directed', nodes = genesNet, alpha = 0.05 )
+sum( test$pvalue <= 0.05 )
+# ntest = test[ , ]
+ntest = test[( test$nab > 0 & test$pvalue <= 0.05 ), ]
+ntest = ntest[ (ntest$conclusion == "Overenrichment" ), ]
+
+GO.NetAB = ath.bp.gs[ match( as.character( ntest$B ), names( ath.bp.gs ) ) ]
+GeneGO.Net = sapply( as.list( GO.NetAB ), function(s) s[ na.omit( match( ATn, s ) ) ] ) 
+
+Netw = names( GeneGO.Net )
+GenesGO.Net = c()
+for( k in 1:length( GeneGO.Net ) ) {
+  if( length( GeneGO.Net[[ k ]]) > 0 ) 
+    GenesGO.Net = rbind( GenesGO.Net, data.frame( GeneID = GeneGO.Net[[ k ]], Network = Netw[ k ] ) )
+}
+
+GenesGO.Net = data.table( GenesGO.Net )
+GenesGO.Nets = GenesGO.Net[ , list( Network = list( unique( as.character( Network ) ) ) ), by = GeneID ]
+DEGlist = rownames( DEG )
+
+save( GenesGO.Net, GenesGO.Nets, DEGlist,
+      file = "/JOB/Work/Translatome/NBEA/NEAT_translatome_WT&IP_GO.RData" )
+write.csv( GenesGO.Net,
+           file = "/JOB/Work/Translatome/NBEA/NEAT_translatome_WT&IP_GO.csv", row.names = F )
+write.matrix( GenesGO.Nets,
+              file = "/JOB/Work/Translatome/NBEA/NEAT_translatome_WT&IP_GOs.csv", sep = "," )
+
+
+#############################################################################################################################
+
+####################################  visualization 
+
+#############################################################################################################################
+
+suppressMessages(library(ggplot2)) # graphic
+suppressMessages(library(reshape2)) # To reshape the data frame
+suppressMessages(library(grid)) # For multiple plots
+suppressMessages(library(gridExtra)) # For multiple plots
+suppressMessages(library(VennDiagram))
+
+
+# First, create a GRanges object for each group (control and treatment)
+dimps = list()
+dimps$Watered = uniqueGRanges(list(DIMPs_CG$CTR1, DIMPs$CTR2, DIMPs$CTR3),
+                              verbose = FALSE)
+dimps$Drought = uniqueGRanges(list(DIMPs_CG$drought2, DIMPs$drought4),
+                              verbose = FALSE)
+# The number of DIMPs in the intersection of these group is obtained:
+n12 = length(GenomicRanges::intersect(dimps$Watered, dimps$Drought))
+
+# Data from the potential signal
+ps = uniqueGRanges(HD, missing = NA, verbose = FALSE, num.cores = 12L)
+data <- data.frame(control.3 = ps$hdiv, control.4 = ps$hdiv.1, 
+                   drought.3 = ps$hdiv.2, drought.3 = ps$hdiv.3)
+data = suppressMessages(melt(data))
+colnames(data) <- c("Samples", "HD")
+
+
+
+The multiplot with the histogram and the Venn diagram can now built:
+  ```{r fig1, fig.height = 7, fig.width = 20}
+
+cutp = 5.9409175
+p1 = ggplot(data, aes(x = HD, fill = Samples, colour = Samples)) + 
+  geom_histogram(alpha = 0.5, bins = 20, position = "identity", na.rm = TRUE,
+                 size = 0.7) + ylab( "Counts" ) +
+  geom_vline(xintercept = cutp, color = "red", linetype = "dashed") +
+  annotate(geom = "text", x = cutp + 0.5, y = -300, fontface = 2, size = 6,
+           label = paste0("cutopoint = ", cutp)) +
+  annotate(geom = "text", x = cutp + 2, y = 18500, label = "DIMPs",
+           fontface = 2, size = 6) +
+  geom_segment(aes(x = cutp, xend = 25, y = 18000, yend = 18000),
+               arrow = arrow(length = unit(0.5, "cm"))) +
+  theme(axis.title.x = element_text(face = "bold", size = 20),
+        axis.text.x = element_text(face = "bold", size = 20, color = "black",
+                                   hjust = 0.5, vjust = 0.75),
+        axis.text.y = element_text(face = "bold", size = 20, color = "black"),
+        axis.title.y = element_text(face = "bold", size = 20,color = "black"),
+        legend.text = element_text(size = 20, face = "bold"),
+        legend.title = element_text(size = 20, face = "bold")
+  )
+
+v = draw.pairwise.venn(area1 = length(dimps$Watered),
+                       area2 = length(dimps$Drought),
+                       cross.area = n12, ind = FALSE,
+                       category = c("Watered", "Drought"),
+                       lty = rep("blank", 2),
+                       fill = c("magenta","blue"),
+                       alpha = c(0.1, 0.2), 
+                       cat.pos = c(-20, 0),
+                       cat.col = c("red", "blue"),
+                       cat.dist = c( -0.1, -0.08),
+                       cex = rep(1.7, 3),
+                       cat.cex = c( 1.5, 1.5),
+                       label.col = c( "red", "white", "blue"),
+                       scaled = TRUE)
+
+grid.arrange(p1, gTree(children = v), ncol = 2)
+
+
+#########################################################################
+#   use mean as reference                                               #
+#########################################################################
+# non-linear fit to a weibull distribution model for ALL context#########
+#########################################################################
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_all_ref.RData")
+
+
+nlms_CG = nonlinearFitDist(HD_CG_mean, column = 9, num.cores = 12L, verbose = FALSE)
+PS_CG = getPotentialDIMP(LR = HD_CG_mean, nlms = nlms_CG, div.col = 9, alpha = 0.05,
+                         tv.col = 7, tv.cut = 0.2)
+
+nlms_CHG = nonlinearFitDist(HD_CHG_mean, column = 9, num.cores = 12L, verbose = FALSE)
+PS_CHG = getPotentialDIMP(LR = HD_CHG_mean, nlms = nlms_CHG, div.col = 9, alpha = 0.05,
+                          tv.col = 7, tv.cut = 0.2)
+
+nlms_CHH = nonlinearFitDist(HD_CHH_mean, column = 9, num.cores = 24L, verbose = FALSE)
+PS_CHH = getPotentialDIMP(LR = HD_CHH_mean, nlms = nlms_CHH, div.col = 9, alpha = 0.05,
+                          tv.col = 7, tv.cut = 0.2)
+
+
+
+cutpoints = estimateCutPoint(LR = PS_CG, control.names = c( "CTR1", "CTR2", "CTR3"),
+                             treatment.names = c( "STR1", "STR2", "STR3"),
+                             div.col = 9, verbose = FALSE)
+cutpoints
+
+
+
+cutpoints_CHG = estimateCutPoint(LR = PS_CHG, control.names = c( "CTR1", "CTR2", "CTR3"),
+                                 treatment.names = c( "STR1", "STR2", "STR3"),
+                                 div.col = 9, verbose = FALSE)
+cutpoints_CHG
+
+
+cutpoints_CHH = estimateCutPoint(LR = PS_CHH, control.names = c( "CTR1", "CTR2", "CTR3"),
+                                 treatment.names = c( "STR1", "STR2", "STR3"),
+                                 div.col = 9, verbose = FALSE)
+cutpoints_CHH
+
+# cutpoint used for mean as reference
+#DIMPs_CG  = selectDIMP(PS_CG, div.col = 9, cutpoint = 0.6248012   )
+#DIMPs_CHG = selectDIMP(PS_CHG, div.col = 9, cutpoint = 0.6248012   )
+#DIMPs_CHH = selectDIMP(PS_CHH, div.col = 9, cutpoint = 0.6248012   )
+
+# cutpoint used for sum as reference
+DIMPs_CG  = selectDIMP(PS_CG, div.col = 9, cutpoint = 1.1104091   )
+DIMPs_CHG = selectDIMP(PS_CHG, div.col = 9, cutpoint = 1.1104091   )
+DIMPs_CHH = selectDIMP(PS_CHH, div.col = 9, cutpoint = 1.1104091   )
+
+
+# cutpoint used for ref0 as reference
+#DIMPs_CG  = selectDIMP(PS_CG, div.col = 9, cutpoint = 7.635210    )
+#DIMPs_CHG = selectDIMP(PS_CHG, div.col = 9, cutpoint = 7.635210    )
+#DIMPs_CHH = selectDIMP(PS_CHH, div.col = 9, cutpoint = 7.635210    )
+
+
+seqnames(DIMPs_CG$CTR1)
+seqnames(DIMPs_CG$CTR2)
+seqnames(DIMPs_CG$CTR3)
+seqnames(DIMPs_CG$STR1)
+seqnames(DIMPs_CG$STR2)
+seqnames(DIMPs_CG$STR3)
+
+
+
+DIMPs_CTR1 = c(DIMPs_CG$CTR1, DIMPs_CHG$CTR1, DIMPs_CHH$CTR1)
+DIMPs_CTR2 = c(DIMPs_CG$CTR2, DIMPs_CHG$CTR2, DIMPs_CHH$CTR2)
+DIMPs_CTR3 = c(DIMPs_CG$CTR3, DIMPs_CHG$CTR3, DIMPs_CHH$CTR3)
+DIMPs_STR1 = c(DIMPs_CG$STR1, DIMPs_CHG$STR1, DIMPs_CHH$STR1)
+DIMPs_STR2 = c(DIMPs_CG$STR2, DIMPs_CHG$STR2, DIMPs_CHH$STR2)
+DIMPs_STR3 = c(DIMPs_CG$STR3, DIMPs_CHG$STR3, DIMPs_CHH$STR3)
+
+DIMPs= list(CTR1=DIMPs_CTR1, CTR2=DIMPs_CTR2, CTR3=DIMPs_CTR3,
+            STR1=DIMPs_STR1, STR2=DIMPs_STR2, STR3=DIMPs_STR3)
+
+
+#DIMPs$CTR1$p2 - DIMPs$CTR1$p2
+
+#dimp.ct1 = DIMPs$CTR1[, c("c2", "t2")]
+#colnames(mcols(dimp.ct1)) <- c("mC", "uC")
+#dimp.ct2 = DIMPs$CTR2[, c("c2", "t2")]
+#colnames(mcols(dimp.ct2)) <- c("mC", "uC")
+#dimp.ct3 = DIMPs$CTR3[, c("c2", "t2")]
+#colnames(mcols(dimp.ct3)) <- c("mC", "uC")
+
+#DIMP_CTR_sum = poolFromGRlist(list(dimp.ct1, dimp.ct2, dimp.ct3), stat = "sum", num.cores = 12L)
+#DIMP_CTR_sum$p0 = DIMP_CTR_sum$mC/(DIMP_CTR_sum$mC + DIMP_CTR_sum$uC)
+
+#dimp.tt1 = DIMPs$STR1[, c("c2", "t2")]
+#colnames(mcols(dimp.tt1)) <- c("mC", "uC")
+#dimp.tt1$p1 = dimp.tt1$mC/(dimp.tt1$mC + dimp.tt1$uC)
+
+#dimp_tt1_ct = uniqueGRanges(list(DIMP_CTR_sum,dimp.tt1))
+#dimp_tt1_ct$TV = dimp_tt1_ct$p1 - dimp_tt1_ct$p0
+
+
+suppressMessages(library(DESeq2))
+suppressMessages(library(rtracklayer))
+
+
+AG = import("/data/TAIR10_gff3/Arabidopsis_thaliana.TAIR10.38.gtf.gz")
+gene = AG[ AG$type == "gene", c( "gene_id", "gene_biotype" ) ]
+gene = gene[ gene$gene_biotype == "protein_coding", "gene_id" ]
+seqlevels(gene, pruning.mode = "coarse") <- c("1", "2", "3", "4", "5")
+seqlevels(gene)<- paste0("Chr", 1:5)
+gene = sortBySeqnameAndStart(gene)
+
+# > x = DIMPs_CTR1$TV
+# > x[ x > 0 ] <-"hyper.methylated"
+# > x[ x < 0 ] <-"hypo.methylated"
+# > table(x)
+
+#======== DIMPs at gene region
+DIMPs_CTR1_gene = getDIMPatGenes(GR = DIMPs$CTR1, GENES = gene)
+DIMPs_CTR2_gene = getDIMPatGenes(GR = DIMPs$CTR2, GENES = gene)
+DIMPs_CTR3_gene = getDIMPatGenes(GR = DIMPs$CTR3, GENES = gene)
+DIMPs_STR1_gene = getDIMPatGenes(GR = DIMPs$STR1, GENES = gene)
+DIMPs_STR2_gene = getDIMPatGenes(GR = DIMPs$STR2, GENES = gene)
+DIMPs_STR3_gene = getDIMPatGenes(GR = DIMPs$STR3, GENES = gene)
+
+
+Genes_DIMPs = uniqueGRanges(list( DIMPs_CTR1_gene[, 2], DIMPs_CTR2_gene[, 2], DIMPs_CTR3_gene[, 2], 
+                                  DIMPs_STR1_gene[, 2], DIMPs_STR2_gene[, 2], DIMPs_STR3_gene[, 2])
+                            , type = "equal", verbose = TRUE,
+                            chromosomes = c("Chr1", "Chr2", "Chr3", "Chr4", "Chr5"),
+                            ignore.strand = TRUE )
+
+colnames( mcols(Genes_DIMPs)) <- c("CTR1", 
+                                   "CTR2",
+                                   "CTR3", 
+                                   "STR1",
+                                   "STR2",
+                                   "STR3")
+
+Genes_DIMPs_ID = subsetByOverlaps(gene, Genes_DIMPs, type = "equal",
+                                  ignore.strand = FALSE)
+
+dmps = data.frame( mcols( Genes_DIMPs ) )
+dmps = apply( dmps, 2, as.numeric )
+rownames(dmps) <- Genes_DIMPs_ID$gene_id
+
+# experiment design
+condition = data.frame(condition = factor(c("CT", "CT", "CT",
+                                            "TT", "TT", "TT"),
+                                          levels = c("CT", "TT")))
+
+rownames(condition) <- c("CTR1", "CTR2", "CTR3", "STR1", "STR2","STR3")
+DIMR <- DESeqDataSetFromMatrix(countData = dmps,
+                               colData = condition,
+                               design = formula( ~ condition ),
+                               rowRanges = Genes_DIMPs)
+
+# paramters used to get 6669 genes when use sum as the reference 
+DMGs = countTest( DIMR, num.cores = 12L, minCountPerIndv = 4, countFilter = TRUE, 
+                  CountPerBp = 0.002, Minlog2FC = 1, pvalCutOff = 0.05, MVrate = .95 )
+DMGs
+
+
+write.csv( DMGs, file ="/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DMGs_Ctrlasref_Cov10_mean.csv",
+           row.names = ROWNAMES(DMGs), quote = FALSE)
+write.csv( DMGs, file ="/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DMGs_ref0.csv",
+           row.names = ROWNAMES(DMGs), quote = FALSE)
+
+
+
+save.image (file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_sum_cov10")
+save.image (file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_mean_cov10")
+
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_sum_cov10")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_ref0_cov10")
+
+
+
+
+ABA_pathway_gene <- read.csv(file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/ABA_pathway_gene.csv", head = TRUE)
+DMGs_ABA_pathway_gene <- DMGs[ na.omit(match(as.character(ABA_pathway_gene$Gene_ID), names(DMGs)))]
+
+write.csv( DMGs_ABA_pathway_gene, file ="/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DMGs_ABA_pathway_gene.csv",
+           row.names = ROWNAMES(DMGs_ABA_pathway_gene), quote = FALSE)
 
 
 
