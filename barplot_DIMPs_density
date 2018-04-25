@@ -1,0 +1,390 @@
+#======================================================================================#
+#
+#### --------------- Cytosine Context abundance at genomic features --------------- ####
+#
+#======================================================================================#
+library(GenomicRanges)
+library(data.table)
+library( rtracklayer )
+library(ggplot2)
+library(biovizBase)
+library(MethylIT)
+setwd("/data/users/xzy50/MethylIT_paper_picture")
+
+load("/data/users/xzy50/MethylIT_paper_picture/DIMPs_drought.RData")
+load("/data/users/xzy50/MethylIT_paper_picture/DIMPs_ssed-dev_cut1.04.RData")
+#================================================================#
+#
+#### ------------------ Genomics feature--------------------- ####
+#
+#=================================================================
+load("Arabidopsis_meth_context_CHR1to5_04_21_18.RData")
+CG = CONT[ CONT$context == "CG" ]
+CHG = CONT[ CONT$context == "CHG" ]
+CHH = CONT[ CONT$context == "CHH" ]
+
+
+load("AT_PROMOTERS.RData")
+AG = import("Arabidopsis_thaliana.TAIR10.38.gtf.gz")
+seqlevels(AG, pruning.mode = "coarse") <- paste0(1:5)
+seqlevels(AG) <- c("Chr1", "Chr2", "Chr3", "Chr4", "Chr5")
+
+exon = AG[ AG@elementMetadata$type == "exon", ]
+five_prime_utr = AG[ AG@elementMetadata$type == "five_prime_utr", ]
+three_prime_utr = AG[ AG@elementMetadata$type == "three_prime_utr", ]
+genebody = c( exon, five_prime_utr, three_prime_utr )
+gene = AG[ which( AG$type == "gene" & AG$gene_biotype == "protein_coding" ), ]
+mcols( exon ) <- NULL
+intron = GenomicRanges::setdiff(gene, genebody)
+
+filename = "TAIR10_GFF3_genes_transposons.gff"
+TE_genes<-import( filename, format = "gff", genome = "TAIR10", colnames = c( "type", "group" ) )
+TEs_denovo<-import( "Bundle_complete.gff3", format = "gff",
+                    genome = "TAIR10", colnames = c("Name","ID","Alias","Target" ) )
+# load("D:/TAIR10_gff3/genomic_region_promoter1500.RData" )
+TE = TE_genes[ TE_genes$type == "transposable_element", ]
+TEgene = TE_genes[ TE_genes$type == "transposable_element_gene", ]
+TEfrag = TE_genes[ TE_genes$type == "transposon_fragment", ]
+pseudogene = TE_genes[ TE_genes$type == "pseudogene", ]
+
+mcols( TE ) <- NULL
+mcols( TEs_denovo ) <- NULL
+TE = unique( c( TE, TEs_denovo ) )
+
+
+tRNA = TE_genes[ TE_genes$type == "tRNA", ]
+rRNA = TE_genes[ TE_genes$type == "rRNA", ]
+ncRNA = TE_genes[ TE_genes$type == "ncRNA", ]
+miRNA = TE_genes[ TE_genes$type == "miRNA", ]
+snRNA = TE_genes[ TE_genes$type == "snRNA", ]
+
+Ann.GR = list(gene, TE, TEgene, TEfrag, pseudogene, tRNA,
+              rRNA, ncRNA, miRNA, snRNA, PROMOTERS )
+AnnGR = GRanges()
+for (k in 1:length( Ann.GR ))
+{
+  mcols( Ann.GR[[ k ]] ) <- NULL
+  AnnGR = c( AnnGR, Ann.GR[[ k ]] )
+}
+AnnGR = sortBySeqnameAndStart( unique( AnnGR ) )
+CHR = TE_genes[ TE_genes$type == "chromosome" ]
+seqlevels(CHR, pruning.mode = "coarse") <- c("Chr1", "Chr2", "Chr3", "Chr4", "Chr5")
+# Not Annotated feature
+NotAnnGR = sortBySeqnameAndStart(GenomicRanges::setdiff(CHR, AnnGR, ignore.strand = TRUE))
+
+
+#----------------------------------------------------------------------------------#
+#
+#### -----------------Function for Methylation At Features -------------------- ####
+#
+#-----------------------------------------------------------------------------------#
+
+MethylationAtFeatures <- function(GR, GR.Context, label )
+{
+  if( class( GR ) == "GRangesList" | class( GR ) == "list" ) GR = UniqueGRanges( GR )
+
+  ### =================== Annotate DIMPs ========================= ### #
+  # reduce will align the ranges and merge overlapping ranges to produce a simplified set.
+  # genes
+  message( "* Computing relative frequency of DIMPs at genomic features ...")
+  exons = sum( countOverlaps( GR, reduce( exon ), type = "within", ignore.strand = TRUE))
+  introns = sum( countOverlaps( GR, reduce( intron ), type = "within", ignore.strand = TRUE))
+  five.prime.utr = sum( countOverlaps( GR, reduce( five_prime_utr ), type = "within", ignore.strand = TRUE))
+  three.prime.utr = sum( countOverlaps( GR, reduce( three_prime_utr ), type = "within", ignore.strand = TRUE))
+  promoters = sum( countOverlaps( GR, reduce( PROMOTERS ), type = "within", ignore.strand = TRUE))
+
+  # TEs
+  TEs = sum( countOverlaps( GR, reduce( TE ), type = "within", ignore.strand = TRUE))
+  TE.genes = sum( countOverlaps( GR, reduce( TEgene ), type = "within", ignore.strand = TRUE))
+  TE.fragments = sum( countOverlaps( GR, reduce( TEfrag ), type = "within", ignore.strand = TRUE))
+  pseudogenes = sum( countOverlaps( GR, reduce( pseudogene ), type = "within", ignore.strand = TRUE))
+
+  # RNAs
+  tRNAs = sum( countOverlaps( GR, reduce( tRNA ), type = "within", ignore.strand = TRUE))
+  rRNAs = sum( countOverlaps( GR, reduce( rRNA ), type = "within", ignore.strand = TRUE))
+  snRNAs = sum( countOverlaps( GR, reduce( snRNA ), type = "within", ignore.strand = TRUE))
+  miRNAs = sum( countOverlaps( GR, reduce( miRNA ), type = "within", ignore.strand = TRUE))
+  ncRNAs = sum( countOverlaps( GR, reduce( ncRNA ), type = "within", ignore.strand = TRUE))
+
+  # Other Regions
+  Other.GRs = sum( countOverlaps( GR, reduce( NotAnnGR ), type = "within", ignore.strand = TRUE))
+
+  ### =================== Annotates Cs ========================= ### #
+  # Genes
+  exons. = sum( countOverlaps(GR.Context, reduce( exon ), type = "within", ignore.strand = TRUE))
+  introns. = sum( countOverlaps(GR.Context, reduce( intron ), type = "within", ignore.strand = TRUE) )
+  five.prime.utr. = sum( countOverlaps(GR.Context, reduce( five_prime_utr ), type = "within", ignore.strand = TRUE))
+  three.prime.utr. = sum( countOverlaps(GR.Context, reduce( three_prime_utr ), type = "within", ignore.strand = TRUE))
+  promoters. = sum( countOverlaps(GR.Context, reduce( PROMOTERS ), type = "within", ignore.strand = TRUE ) )
+
+  # TEs
+  TE. = sum( countOverlaps( GR.Context, reduce( TE ), type = "within", ignore.strand = TRUE ) )
+  TEgene. = sum( countOverlaps( GR.Context, reduce( TEgene ), type = "within", ignore.strand = TRUE))
+  TEfrag. = sum( countOverlaps( GR.Context, reduce( TEfrag ), type = "within", ignore.strand = TRUE))
+  pseudogene. = sum( countOverlaps( GR.Context, reduce( pseudogene ), type = "within", ignore.strand = TRUE))
+
+  # RNAs
+  tRNA. = sum( countOverlaps( GR.Context, reduce( tRNA ), type = "within", ignore.strand = TRUE))
+  rRNA. = sum( countOverlaps( GR.Context, reduce( rRNA ), type = "within", ignore.strand = TRUE))
+  snRNA. = sum( countOverlaps( GR.Context, reduce( snRNA ), type = "within", ignore.strand = TRUE))
+  miRNA. = sum( countOverlaps( GR.Context, reduce( miRNA ), type = "within", ignore.strand = TRUE))
+  ncRNA. = sum( countOverlaps( GR.Context, reduce( ncRNA ), type = "within", ignore.strand = TRUE))
+
+  # Other Regions
+  NotAnnGR. = sum( countOverlaps( GR.Context, reduce( NotAnnGR ), type = "within", ignore.strand = TRUE))
+
+  return( data.frame( labels = rep( label, 5 ),
+                      counts = c( promoters/promoters.,
+                                  three.prime.utr/three.prime.utr.,
+                                  exons/exons.,
+                                  introns/introns.,
+                                  five.prime.utr/five.prime.utr.,
+                                  TEs/TE.,
+                                  TE.genes/TEgene.,
+                                  TE.fragments/TEfrag.,
+                                  pseudogenes/pseudogene.,
+                                  tRNAs/tRNA.,
+                                  rRNAs/rRNA.,
+                                  snRNAs/snRNA.,
+                                  miRNAs/miRNA.,
+                                  ncRNAs/ncRNA.,
+                                  Other.GRs/NotAnnGR.
+                      ),
+                      feature = factor( c( "promoters", "3UTRs", "exons", "introns", "5UTRs",
+                                           "TEs", "TE.genes", "TE.fragments", "pseudogenes",
+                                           "tRNAs", "rRNAs", "snRNAs", "miRNAs", "ncRNAs", "Other.GRs" ))))
+}
+
+#----------------------------------------------------------------------#
+#
+#### ----------------- Methylation At Features -------------------- ####
+#
+#----------------------------------------------------------------------#
+
+# ========================= CG Seed Development ========================== #
+cot.seed.CG = MethylationAtFeatures(GR = DIMPs_CG$cot.seed, GR.Context = CG, label = "CG COT seed")
+  mg.seed.CG = MethylationAtFeatures(GR = DIMPs_CG$mg.seed, GR.Context = CG, label = "CG MG seed")
+pmg.seed.CG = MethylationAtFeatures(GR = DIMPs_CG$pmg.seed, GR.Context = CG, label = "CG PMG seed")
+dry.seed.CG = MethylationAtFeatures(GR = DIMPs_CG$dry.seed, GR.Context = CG, label = "CG DRY seed")
+        leaf.CG = MethylationAtFeatures(GR = DIMPs_CG$leaf, GR.Context = CG, label = "CG leaf"  )
+
+# ======================== CHG Seed Development ========================== #
+cot.seed.CHG = MethylationAtFeatures(GR = DIMPs_CHG$cot.seed, GR.Context = CHG, label = "CHG COT seed")
+mg.seed.CHG = MethylationAtFeatures(GR = DIMPs_CHG$mg.seed, GR.Context = CHG, label = "CHG MG seed")
+pmg.seed.CHG = MethylationAtFeatures(GR = DIMPs_CHG$pmg.seed, GR.Context = CHG, label = "CHG PMG seed")
+dry.seed.CHG = MethylationAtFeatures( GR = DIMPs_CHG$dry.seed, GR.Context = CHG, label = "CHG DRY seed")
+leaf.CHG = MethylationAtFeatures(GR = DIMPs_CHG$leaf, GR.Context = CHG, label = "CHG leaf")
+
+# ======================== CHH Seed Development ========================== #
+cot.seed.CHH = MethylationAtFeatures( GR = DIMPs_CHH$cot.seed, GR.Context = CHH, label = "CHH COT seed"  )
+mg.seed.CHH = MethylationAtFeatures( GR = DIMPs_CHH$mg.seed, GR.Context = CHH, label = "CHH MG seed"  )
+pmg.seed.CHH = MethylationAtFeatures( GR = DIMPs_CHH$pmg.seed, GR.Context = CHH, label = "CHH PMG seed"  )
+dry.seed.CHH = MethylationAtFeatures( GR = DIMPs_CHH$dry.seed, GR.Context = CHH, label = "CHH DRY seed"  )
+leaf.CHH = MethylationAtFeatures(GR = DIMPs_CHH$leaf, GR.Context = CHH, label = "CHH leaf"  )
+
+data.sd = rbind(cot.seed.CG, mg.seed.CG, pmg.seed.CG, dry.seed.CG, leaf.CG,
+                cot.seed.CHG, mg.seed.CHG, pmg.seed.CHG, dry.seed.CHG, leaf.CHG,
+                cot.seed.CHH, mg.seed.CHH, pmg.seed.CHH, dry.seed.CHH, leaf.CHH )
+
+save(data.sd, file = "/data/users/xzy50/MethylIT_paper_picture/data_for_BarPlot_SeedDevelomental-3-CONTEXTS_NORMALIZED_24_03_18.RData" )
+
+
+# ========================= CG Drought experiment ========================== #
+CTR1.CG = MethylationAtFeatures(GR = DIMPs_CG_drought$CTR1, GR.Context = CG, label = "CG CTR1")
+CTR2.CG = MethylationAtFeatures(GR = DIMPs_CG_drought$CTR2, GR.Context = CG, label = "CG CTR2")
+CTR3.CG = MethylationAtFeatures(GR = DIMPs_CG_drought$CTR3, GR.Context = CG, label = "CG CTR3")
+STR1.CG = MethylationAtFeatures(GR = DIMPs_CG_drought$STR1, GR.Context = CG, label = "CG STR1")
+STR2.CG = MethylationAtFeatures(GR = DIMPs_CG_drought$STR2, GR.Context = CG, label = "CG STR2")
+STR3.CG = MethylationAtFeatures(GR = DIMPs_CG_drought$STR3, GR.Context = CG, label = "CG STR3")
+
+# ======================== CHG Drought experiment ========================== #
+CTR1.CHG = MethylationAtFeatures(GR = DIMPs_CHG_drought$CTR1, GR.Context = CHG, label = "CHG CTR1")
+CTR2.CHG = MethylationAtFeatures(GR = DIMPs_CHG_drought$CTR2, GR.Context = CHG, label = "CHG CTR2")
+CTR3.CHG = MethylationAtFeatures(GR = DIMPs_CHG_drought$CTR3, GR.Context = CHG, label = "CHG CTR3")
+STR1.CHG = MethylationAtFeatures(GR = DIMPs_CHG_drought$STR1, GR.Context = CHG, label = "CHG STR1")
+STR2.CHG = MethylationAtFeatures(GR = DIMPs_CHG_drought$STR2, GR.Context = CHG, label = "CHG STR2")
+STR3.CHG = MethylationAtFeatures(GR = DIMPs_CHG_drought$STR3, GR.Context = CHG, label = "CHG STR3")
+
+# ======================== CHH Drought experiment ========================== #
+CTR1.CHH = MethylationAtFeatures(GR = DIMPs_CHH_drought$CTR1, GR.Context = CHH, label = "CHH CTR1")
+CTR2.CHH = MethylationAtFeatures(GR = DIMPs_CHH_drought$CTR2, GR.Context = CHH, label = "CHH CTR2")
+CTR3.CHH = MethylationAtFeatures(GR = DIMPs_CHH_drought$CTR3, GR.Context = CHH, label = "CHH CTR3")
+STR1.CHH = MethylationAtFeatures(GR = DIMPs_CHH_drought$STR1, GR.Context = CHH, label = "CHH STR1")
+STR2.CHH = MethylationAtFeatures(GR = DIMPs_CHH_drought$STR2, GR.Context = CHH, label = "CHH STR2")
+STR3.CHH = MethylationAtFeatures(GR = DIMPs_CHH_drought$STR3, GR.Context = CHH, label = "CHH STR3")
+
+data.drought = rbind(CTR1.CG, CTR2.CG, CTR3.CG, STR1.CG, STR2.CG, STR3.CG,
+                     CTR1.CHG, CTR2.CHG, CTR3.CHG, STR1.CHG, STR2.CHG, STR3.CHG,
+                     CTR1.CHH, CTR2.CHH, CTR3.CHH, STR1.CHH, STR2.CHH, STR3.CHH)
+save(data.drought, file = "/data/users/xzy50/MethylIT_paper_picture/data_for_BarPlot_DroughtExp-4_24_2018.RData" )
+
+## ====================================================================== #
+#
+##### ============ Barplots ML & trans-generation samples ============ ####
+#
+## ====================================================================== #
+
+# Data generated at "/data/Larry/F15FTSUSAT0821_ARAhlaM/methFT/ath_meth_ft_02.R"
+# and "/data/Larry/Methylation_john/Transgenerational2/Cs/methratio/ath_trans-gen_meth_ft.R"
+library(ggplot2)
+source("/data/Work/R_functions/multiplot.R")
+# margin(t = 0, r = 0, b = 0, l = 0, unit = "pt")
+load("/data/users/xzy50/MethylIT_paper_picture/data_for_BarPlot_SeedDevelomental-3-CONTEXTS_NORMALIZED_24_03_18.RData")
+load("/data/users/xzy50/MethylIT_paper_picture/data_for_BarPlot_DroughtExp-3-CONTEXTS_NORMALIZED_24_03_18.RData")
+
+labels <- c( "CG COT seed", "CG MG seed", "CG PMG seed", "CG DRY seed", "CG leaf",
+             "CG CTR1", "CG CTR2", "CG CTR3", "CG STR1", "CG STR2", "CG STR3",
+
+
+             "CHG COT seed", "CHG MG seed", "CHG PMG seed", "CHG DRY seed", "CHG leaf",
+             "CHG CTR1", "CHG CTR2", "CHG CTR3", "CHG STR1", "CHG STR2", "CHG STR3",
+
+             "CHH COT seed", "CHH MG seed", "CHH PMG seed", "CHH DRY seed", "CHH leaf",
+             "CHH CTR1", "CHH CTR2", "CHH CTR3", "CHH STR1", "CHH STR2", "CHH STR3"
+              )
+
+label = c( "COT seed", "MG seed", "PMG seed", "DRY seed", "leaf", "CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+
+datos = rbind(data.sd, data.drought)
+datos$labels <- factor(datos$labels, levels = labels )
+
+CG = datos[ grep( "CG", datos$labels ), ]
+CG$labels = sub( "CG", "", CG$labels )
+CG$labels <- factor( CG$labels, levels = label )
+
+#p1 = ggplot(CG, aes( x = labels, y = counts, fill = feature) ) +
+p1 = ggplot(CG, aes( x = labels, y = counts, fill = feature, order = feature ) ) +
+  geom_bar(stat = "identity") +
+  # scale_fill_manual(values = c("promoters" = "yellow", "3UTRs" = "orchid", "exons" ="royalblue1",
+  #                              "introns" ="green2", "5UTRs" ="magenta", "TE.genes" = "darkmagenta",
+  #                              "TE.fragments" = "red", "TEs" = "lightsalmon3", "pseudogenes" = "orange1",
+  #                              "tRNAs" = "deeppink3", "rRNAs" = "lightskyblue",
+  #                              "snRNAs" = "maroon2", "miRNAs" = "darkblue",
+  #                              "ncRNAs" = "darkgreen", "Other.GRs" = "purple") ) +
+  scale_fill_manual(values = c("promoters" = "#000289", "3UTRs" = "#009aa9", "exons" ="#00490c",
+                               "introns" ="#009a7f", "5UTRs" ="#330808", "TE.genes" = "#f1fba6",
+                               "TE.fragments" = "#ffd162", "TEs" = "#ff841f", "pseudogenes" = "#e50000",
+                               "tRNAs" = "#62ff84", "rRNAs" = "#ff9be7",
+                               "snRNAs" = "#4dffce", "miRNAs" = "#befdd5",
+                               "ncRNAs" = "#b7f4a9", "Other.GRs" = "#f93c3c") ) +    
+  scale_y_continuous( name = "Relative frequency of DIMPs", breaks = seq( 0, 1.25, 0.25 ), limits = c( 0, 1.30 ) ) +
+  theme_bw() +
+  theme(axis.title.x =  element_blank(),
+        axis.text.x  = element_text( face = "bold", size = 3, color="black",
+                                     hjust = -0.1, vjust = 0.5, angle = -90,
+                                     margin = margin( 0.1,0,0,0, unit = "pt" )),
+        axis.text.y  = element_text( face = "bold", size = 3, color="black",
+                                     margin = margin( 0,0.1,0,0, unit = "mm" ) ),
+        legend.position="none",
+        axis.title.y = element_text( face = "bold", size = 3.5, color="black", vjust = -15 ),
+        panel.border = element_rect(fill=NA, colour = "black",size=0.07),
+        panel.grid.major = element_line(color = "gray", size = 0.05),
+        panel.grid.minor = element_line(color= "gray89",size = 0.05),
+        axis.ticks = element_line(size = 0.05), axis.ticks.length = unit(0.4, "mm"),
+        plot.title = element_text(lineheight=1, face="bold.italic", hjust=0, vjust=1.1, size=3),
+        plot.margin = unit(c(0,0,0,0), "lines")) +
+  geom_text(aes(x = 5.5, y = 1.1, label = "CG"),fontface=3,
+            size = 1.5, family = "serif", colour = "black" )
+# ggtitle( "CG" )
+
+CHG = datos[ grep( "CHG", datos$labels ), ]
+CHG$labels = sub( "CHG ", "", CHG$labels )
+CHG$labels <- factor( CHG$labels, levels = label )
+
+
+
+
+p2 = ggplot(CHG, aes( x = labels, y = counts, fill = feature, order = feature ) ) +
+  geom_bar(stat = "identity") +
+  # scale_fill_manual(values = c("promoters" = "yellow", "3UTRs" = "orchid", "exons" ="royalblue1",
+  #                              "introns" ="green2", "5UTRs" ="magenta", "TE.genes" = "darkmagenta",
+  #                              "TE.fragments" = "red", "TEs" = "lightsalmon3", "pseudogenes" = "orange1",
+  #                              "tRNAs" = "deeppink3", "rRNAs" = "lightskyblue",
+  #                              "snRNAs" = "maroon2", "miRNAs" = "darkblue",
+  #                              "ncRNAs" = "darkgreen", "Other.GRs" = "purple") ) +
+  scale_fill_manual(values = c("promoters" = "#000289", "3UTRs" = "#009aa9", "exons" ="#00490c",
+                               "introns" ="#009a7f", "5UTRs" ="#330808", "TE.genes" = "#f1fba6",
+                               "TE.fragments" = "#ffd162", "TEs" = "#ff841f", "pseudogenes" = "#e50000",
+                               "tRNAs" = "#62ff84", "rRNAs" = "#ff9be7",
+                               "snRNAs" = "#4dffce", "miRNAs" = "#befdd5",
+                               "ncRNAs" = "#b7f4a9", "Other.GRs" = "#f93c3c") ) +   
+  scale_y_continuous( breaks = seq( 0, 1.25, 0.25 ), limits = c( 0, 1.30 ) ) +
+  theme_bw() +
+  theme(axis.title.x =  element_blank(),
+        axis.text.x  = element_text( face = "bold", size = 3, color="black",
+                                     hjust = -0.1, vjust = 0.5, angle = -90,
+                                     margin = margin( 0.1,0,0,0, unit = "pt" ) ),
+        axis.text.y = element_blank(),
+        # axis.text.y  = element_text( face = "bold", size = 3, color="black",
+        #                              margin = margin( 0,0.1,0,0, unit = "mm" ) ),
+        axis.title.y = element_blank(),
+        legend.position="none",
+        panel.border = element_rect(fill=NA, colour = "black",size=0.07),
+        panel.grid.major = element_line(color = "gray", size = 0.05),
+        panel.grid.minor = element_line(color= "gray89",size = 0.05),
+        # axis.ticks = element_blank(),
+        axis.ticks = element_line(size = 0.05), axis.ticks.length = unit(0.4, "mm"),
+        axis.ticks.y = element_line( color = "white" ),
+        plot.title = element_text(lineheight=1, face="bold.italic", hjust=0, vjust=1.1, size=3),
+        plot.margin = unit(c(0,0,0,0), "lines")) +
+  geom_text(aes(x = 5.5, y = 1.1, label = "CHG"),fontface=3,
+            size = 1.5, family = "serif", colour = "black" )
+# ggtitle("CHG")
+
+CHH = datos[ grep( "CHH", datos$labels ), ]
+CHH$labels = sub( "CHH ", "", CHH$labels )
+CHH$labels <- factor( CHH$labels, levels = label )
+
+p3 = ggplot(CHH, aes( x = labels, y = counts, fill = feature, order = counts ) ) +
+  geom_bar( stat = "identity" ) +
+  # scale_fill_manual(values = c("promoters" = "yellow", "3UTRs" = "orchid", "exons" ="royalblue1",
+  #                              "introns" ="green2", "5UTRs" ="magenta", "TE.genes" = "darkmagenta",
+  #                              "TE.fragments" = "red", "TEs" = "lightsalmon3", "pseudogenes" = "orange1",
+  #                              "tRNAs" = "deeppink3", "rRNAs" = "lightskyblue",
+  #                              "snRNAs" = "maroon2", "miRNAs" = "darkblue",
+  #                              "ncRNAs" = "darkgreen", "Other.GRs" = "purple") ) +
+  scale_fill_manual(values = c("promoters" = "#000289", "3UTRs" = "#009aa9", "exons" ="#00490c",
+                               "introns" ="#009a7f", "5UTRs" ="#330808", "TE.genes" = "#f1fba6",
+                               "TE.fragments" = "#ffd162", "TEs" = "#ff841f", "pseudogenes" = "#e50000",
+                               "tRNAs" = "#62ff84", "rRNAs" = "#ff9be7",
+                               "snRNAs" = "#4dffce", "miRNAs" = "#befdd5",
+                               "ncRNAs" = "#b7f4a9", "Other.GRs" = "#f93c3c") ) +   
+  scale_y_continuous( breaks = seq( 0, 1.25, 0.25 ), limits = c( 0, 1.30 ) ) +
+  theme_bw() +
+  theme(axis.title.x =  element_blank(),
+        axis.text.x  = element_text( face = "bold", size = 3, color="black",
+                                     hjust = -0.1, vjust = 0.5, angle = -90,
+                                     margin = margin( 0.1,0,0,0, unit = "pt" ) ),
+        axis.text.y = element_blank(),
+        # axis.text.y  = element_text( face = "bold", size = 3, color="black",
+        #                              margin = margin( 0,0.1,0,0, unit = "mm" ) ),
+        axis.title.y =  element_blank(),
+        # axis.title.y = element_text( face = "bold", size = 4, color="black", vjust = -15 ),
+        legend.title = element_blank(),
+        legend.margin = margin( 0,3,0,-3.23, unit = "mm" ) ,
+        legend.box.just = "left",
+        legend.key.size = unit( 3, "lines"),
+        legend.justification = 0.6,
+        legend.text.align = 0.1,
+        legend.key = element_blank(),
+        legend.key.height=unit(1.1, "mm"),
+        legend.key.width=unit(0.9, "mm"),
+        legend.text = element_text(face = "bold", size = 3, color="black"),
+        panel.border = element_rect(fill=NA, colour = "black",size=0.07),
+        panel.grid.major = element_line(color = "gray", size = 0.05),
+        panel.grid.minor = element_line(color= "gray89",size = 0.05),
+        # axis.ticks = element_blank(),
+        axis.ticks = element_line(size = 0.05), axis.ticks.length = unit(0.4, "mm"),
+        axis.ticks.y = element_line( color = "white" ),
+        plot.title = element_text(lineheight=1, face="bold.italic", hjust=0, vjust=1.1, size=3),
+        plot.margin = unit(c(0,0,0,0), "lines")) +
+  guides(guide_legend(label.hjust = 0,keywidth=1)) +
+  geom_text(aes(x = 5.5, y = 1.1, label = "CHH"),fontface=3,
+            size = 1.5, family = "serif", colour = "black" )
+
+library( gridExtra )
+
+tiff(file="/data/users/xzy50/MethylIT_paper_picture/BarPlot_seed_development_drought_2.tif",
+     width = 2200, height = 1000, res = 920, pointsize = 1 )
+marrangeGrob( list(p1,p2,p3), nrow=1, ncol=3, widths= c(2.7,2.1,3.6), padding=unit(0, "mm"), top = NULL )
+dev.off()
