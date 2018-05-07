@@ -1,0 +1,55 @@
+
+#================================================================= #
+#
+####### =============== Gene Annotation =================== ######
+#
+# ================================================================= #
+library(EnrichmentBrowser)
+library(data.table)
+library(MASS)
+# ============================================== #
+# ====================== DMGs ==================
+# ============================================== #
+DMGs = read.csv("/data/droughtExp/list1_DMGs_Ctrlasref_Cov10_sum.csv",
+                header = TRUE)
+AG = import( "/data/TAIR10_gff3/Arabidopsis_thaliana.TAIR10.38.gff3.gz" )
+seqlevels( AG ) <- c( "Chr1","Chr2","Chr3","Chr4","Chr5","ChrM","ChrC" )
+Genes = AG[ AG$type == "gene",  c("gene_id", "Name", "description") ]
+# ============================================== #
+# ======== TAIR10 functional descriptions =======
+# ============================================== #
+# AnnFD = read.csv(file = "/data/TAIR10_gff3/TAIR10_functional_descriptions_20140331.csv")
+AnnFD = read.csv(file = "/data/TAIR10_gff3/TAIR10_functional_descriptions_20140331.csv")
+AnnFD = AnnFD[ AnnFD$Type == "protein_coding", ]
+AnnFD$Model_name <- sub("[.][1-9]", "", AnnFD$Model_name)
+AnnFD = AnnFD[, c("Model_name", "Short_description", "Curator_summary",
+                  "Computational_description")]
+# ============================================== #
+# === GOs for DMGs in networks ===
+# ============================================== #
+# GOs = read.csv(file = "/data/TAIR10_gff3/ATH_GO_GOSLIM_2018_03_30.csv")
+# GOs = data.table(GOs)
+# GOs = GOs[, list(GO_term = list(unique(GO_term)),
+#                  GO_ID = list(unique(GO_ID)),
+#                  Goslim_term = list(unique(Goslim_term))),
+#           by = locus]
+# save(GOs, file = "/data/TAIR10_gff3/ATH_GO_GOSLIM_2018_03_30.RData")
+# load("/data/TAIR10_gff3/ATH_GO_GOSLIM_2018_03_30.RData")
+# idx = match(DMGs$locus, GOs$locus)
+# DMGs_GOs = GOs[idx]
+# ============================================== #
+# === Annotated pathways for DMGs in pathways ===
+# ============================================== #
+kegg.gs <- get.kegg.genesets( "ath" )
+locus = unlist(kegg.gs)
+locus.pathway = data.frame(locus = unlist(sapply(DMGs$locus, function(s)
+  locus[which( s == locus)])))
+locus.pathway = data.table(pathways = rownames(locus.pathway),
+                           locus.pathway)
+locus.pathway = locus.pathway[, list(pathways = list(unique(pathways))),
+                              by = locus]
+DMGs_Ann = data.frame(DMGs, locus.pathway[match(DMGs$locus, 
+                                                locus.pathway$locus)],
+                      AnnFD[match(DMGs$locus, AnnFD$Model_name),])
+write.matrix(DMGs_Ann, file = "/data/droughtExp/Annotate_list1_DMGs_Ctrlasref_Cov10_sum.txt",
+             sep = "\t")
