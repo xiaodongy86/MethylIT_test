@@ -1,0 +1,55 @@
+M_1_168_pctUnMethylated_Pt = 0.992249769572645
+M_1_179_pctUnMethylated_Pt = 0.992551489380735
+M_1_27_pctUnMethylated_Pt = 0.993897565310343
+M_1_3_pctUnMethylated_Pt = 0.994125732713578
+NM_1_12_pctUnMethylated_Pt = 0.995115056343015
+NM_1_45_pctUnMethylated_Pt = 0.99336629859872
+NM_1_70_pctUnMethylated_Pt = 0.99405298350861
+NM_1_86_pctUnMethylated_Pt = 0.994298231139244
+NM_1_91_pctUnMethylated_Pt = 0.990539113239827
+W_1_1_pctUnMethylated_Pt = 0.994292461548444
+W_1_2_pctUnMethylated_Pt = 0.993488539579244
+W_1_3_pctUnMethylated_Pt = 0.994963245604935
+W_1_4_pctUnMethylated_Pt = 0.995778019826722
+W_1_5_pctUnMethylated_Pt = 0.995179824367059
+
+Thanks,
+Tom
+
+
+
+library(dplyr)
+
+M_1_105 <-read.delim("/var/tmp/M-1-105.cov.CX_report.txt")
+M_1_168 <-read.delim("/var/tmp/M-1-168.cov.CX_report.txt")
+M_1_179 <-read.delim("/var/tmp/M-1-179.cov.CX_report.txt")
+M_1_27 <-read.delim("/var/tmp/M-1-27.cov.CX_report.txt")
+M_1_3 <-read.delim("/var/tmp/M-1-3.cov.CX_report.txt")
+NM_1_12 <-read.delim("/var/tmp/NM-1-12.cov.CX_report.txt")
+NM_1_45 <-read.delim("/var/tmp/NM-1-45.cov.CX_report.txt")
+NM_1_70 <-read.delim("/var/tmp/NM-1-70.cov.CX_report.txt")
+NM_1_86 <-read.delim("/var/tmp/NM-1-86.cov.CX_report.txt")
+NM_1_91 <-read.delim("/var/tmp/NM-1-91.cov.CX_report.txt")
+W_1_1 <-read.delim("/var/tmp/W-1-1.cov.CX_report.txt")
+W_1_2 <-read.delim("/var/tmp/W-1-2.cov.CX_report.txt")
+W_1_3 <-read.delim("/var/tmp/W-1-3.cov.CX_report.txt")
+W_1_4 <-read.delim("/var/tmp/W-1-4.cov.CX_report.txt")
+W_1_5 <-read.delim("/var/tmp/W-1-5.cov.CX_report.txt")
+
+names(M_1_105)<-c("chr","position","strand","mC","uC","context","sequence")
+names(M_1_168)<-c("chr","position","strand","mC","uC","context","sequence")
+names(M_1_179)<-c("chr","position","strand","mC","uC","context","sequence")
+names(M_1_27)<-c("chr","position","strand","mC","uC","context","sequence")
+names(M_1_3)<-c("chr","position","strand","mC","uC","context","sequence")
+names(NM_1_12)<-c("chr","position","strand","mC","uC","context","sequence")
+names(NM_1_45)<-c("chr","position","strand","mC","uC","context","sequence")
+names(NM_1_70)<-c("chr","position","strand","mC","uC","context","sequence")
+names(NM_1_86)<-c("chr","position","strand","mC","uC","context","sequence")
+names(NM_1_91)<-c("chr","position","strand","mC","uC","context","sequence")
+names(W_1_1)<-c("chr","position","strand","mC","uC","context","sequence")
+names(W_1_2)<-c("chr","position","strand","mC","uC","context","sequence")
+names(W_1_3)<-c("chr","position","strand","mC","uC","context","sequence")
+names(W_1_4)<-c("chr","position","strand","mC","uC","context","sequence")
+names(W_1_5)<-c("chr","position","strand","mC","uC","context","sequence")
+
+M_1_105_pctUnMethylated_Pt <- 1-( M_1_105 %>% filter(chr=="Pt") %>% filter(mC+uC > 0) %>% mutate(pct_meth=mC/(mC+uC)) %>% summarize(mean(pct_meth)) )
