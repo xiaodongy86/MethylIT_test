@@ -1,0 +1,43 @@
+library(rtracklayer)
+chrs = paste0("Chr", 1:5)
+
+seqlength <- function(gr) {
+  chrs = seqlevels(gr)
+  sn = as.character(seqnames(gr))
+  l = max(split(end(gr), seqnames(gr)))
+  names(l) <- chrs
+  gr@seqinfo@seqlengths <- l
+  return(gr)
+}
+
+HD_CTR = uniqueGRanges(list(HD_CTR1, HD_CTR2, HD_CTR3), columns = 7L,
+                       num.cores = 5L)
+mcols(HD_CTR) <- rowMeans(as.matrix(mcols(HD_CTR)))
+
+
+HD_STR = uniqueGRanges(list(HD_STR1, HD_STR2, HD_STR3), columns = 7L,
+                       num.cores = 5L)
+mcols(HD_STR) <- rowMeans(as.matrix(mcols(HD_STR)))
+
+
+HD_CTR_tv = HD_CTR
+colnames(mcols(HD_CTR_tv)) <- "score" 
+HD_CTR_tv = seqlength(HD_CTR_tv)
+x1 = HD_CTR_tv
+seqlevels(x1, pruning.mode = "coarse") <- "Chr2"
+x1$score = abs(x1$score)
+
+HD_STR_tv = HD_STR
+colnames(mcols(HD_STR_tv)) <- "score" 
+HD_STR_tv = seqlength(HD_STR_tv)
+x2 = HD_STR_tv
+seqlevels(x2, pruning.mode = "coarse") <- "Chr2"
+x2$score = abs(x2$score)
+
+
+export.wig(x1, con = "tvd_ctr_chr2.wig", format = "wig")
+export.wig(x2, con = "tvd_str_chr2.wig", format = "wig")
+
+
+save(DMGs, DIMPs, HD_CTR1, HD_CTR2, HD_CTR3, HD_STR1, HD_STR2, HD_STR3, HD_CTR,
+     HD_STR, file = "./drought-exp_mitotic_xzy-run_4_9_2018.R")
