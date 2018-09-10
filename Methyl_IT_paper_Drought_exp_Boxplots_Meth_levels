@@ -1,0 +1,301 @@
+## ====================================================================== #
+#
+##### ====== Boxplots Meth. levels, TVD & barplot. Drought  ========== ####
+#
+## ====================================================================== #
+library(MethylIT)
+library(ggplot2)
+library( gridExtra )
+library(rtracklayer)
+# margin(t = 0, r = 0, b = 0, l = 0, unit = "pt")
+setwd("/data/droughtExp")
+
+# Data from:
+# load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/run_4_9_2018")
+# Xiaodong did not remember the original parameter setting of DMGs. So
+# the original number 6669 was transformed into 6619
+# save(DMGs, DIMPs, HD_CTR1, HD_CTR2, HD_CTR3, HD_STR1, HD_STR2, HD_STR3,
+# file = "./drought-exp_mitotic_xzy-run_4_9_2018.R")
+
+load("./drought-exp_mitotic_xzy-run_4_9_2018.R")
+
+# AG = import("/data/TAIR10_gff3/Arabidopsis_thaliana.TAIR10.38.gtf.gz")
+# gene = AG[ AG$type == "gene", c( "gene_id", "gene_biotype" ) ]
+# gene = gene[ gene$gene_biotype == "protein_coding", "gene_id" ]
+# seqlevels(gene, pruning.mode = "coarse") <- c("1", "2", "3", "4", "5")
+# seqlevels(gene)<- paste0("Chr", 1:5)
+# gene = sortBySeqnameAndStart(gene)
+
+DMGs = makeGRangesFromDataFrame(DMGs, keep.extra.columns = TRUE)
+
+
+TVD_DIMPs = getGRegionsStat(GR = DIMPs, grfeatures = DMGs, stat = "mean", 
+                            column = 7L, absolute = TRUE)
+TVD_DIMPs = uniqueGRanges(TVD_DIMPs)
+colnames(mcols(TVD_DIMPs)) <- c("CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+
+tvd.ctrl = rowSums(as.matrix(mcols(TVD_DIMPs[, c("CTR1", "CTR2", "CTR3")])))
+tvd.treat = rowSums(as.matrix(mcols(TVD_DIMPs[, c("STR1", "STR2", "STR3")])))
+l = length(tvd.ctrl)
+
+tvd.dt = data.frame(TV = c(tvd.ctrl, tvd.treat),
+                   group = c(rep("Control", l), rep("Stressed", l)))
+
+p1 = ggplot(tvd.dt, aes(x = group, y = TV, fill = group)) + 
+  geom_boxplot(notch = TRUE, outlier.colour="red", outlier.size = 0.1,
+               notchwidth = 0.1, varwidth = TRUE, size = 0.1) +
+  scale_fill_manual(values = c("forestgreen", "dodgerblue")) +
+  ylab("Mean abs. diff. of meth. levels means") + #ggtitle("A") +
+  theme(axis.title.x =  element_blank(),
+        text = element_text(family = "serif"),
+        plot.title = element_text(face = "bold", hjust = -0.15, size = 4, 
+                                  margin = margin(t = 1, r = 1.3, b = 0, l = 0)), 
+        #axis.text.x  =  element_blank(),
+        axis.text.x  = element_text( face = "bold", size = 4, color = "black",
+                                     hjust = 0.5, vjust = 0.5, angle = 0,
+                                     margin = margin(0,0,0.5,0, unit = "pt" )),
+        axis.text.y  = element_text( face = "bold", size = 4, color = "black",
+                                     margin = margin(0.1,0.1,0,0, unit = "mm" ) ),
+        legend.position = "none",
+        axis.title.y = element_text( face = "bold", size = 4.2,
+                                     color = "black", 
+                                     margin = margin(0.1,0.5,0,1, unit = "mm" )),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.07),
+        panel.grid.major = element_line(color = "gray", size = 0.05),
+        panel.grid.minor = element_line(color = "gray89",size = 0.05),
+        axis.ticks = element_line(size = 0.05), axis.ticks.length = unit(0.4, "mm"),
+        plot.margin = unit(c(1,2,1,0), "lines")) +
+  geom_text(aes(x = 1.5, y = 2.3, label = "***"),
+            fontface = 3, size = 1.2, family = "serif", colour = "black" )
+
+
+HD_DIMPs = getGRegionsStat(GR = DIMPs, grfeatures = DMGs, stat = "mean", 
+                           column = 9L)
+
+HD_DIMPs = uniqueGRanges(HD_DIMPs)
+colnames(mcols(HD_DIMPs)) <- c("CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+
+hd.ctrl = rowSums(as.matrix(mcols(HD_DIMPs[, c("CTR1", "CTR2", "CTR3")])))
+hd.treat = rowSums(as.matrix(mcols(HD_DIMPs[, c("STR1", "STR2", "STR3")])))
+hd.dt = data.frame(HD = c(hd.ctrl, hd.treat), 
+                   group = c(rep("Control", l), rep("Stressed", l)))
+l = length(hd.ctrl)
+
+
+p2 = ggplot(hd.dt, aes(x = group, y = HD, fill = group)) + 
+  geom_boxplot(notch = TRUE, outlier.colour="red", outlier.size = 0.1,
+               notchwidth = 0.1, varwidth = TRUE, size = 0.1) +
+  scale_fill_manual(values = c("forestgreen", "dodgerblue")) +
+  ylab("Mean of Hellinger divergence means") + #ggtitle("B") +
+  theme(axis.title.x =  element_blank(),
+        text = element_text(family = "serif"),
+        plot.title = element_text(face = "bold", hjust = -0.15, size = 4, 
+                                  margin = margin(t = 1, r = 1.3, b = 0, l = 0)), 
+        #axis.text.x  =  element_blank(),
+        axis.text.x  = element_text( face = "bold", size = 4, color = "black",
+                                     hjust = 0.5, vjust = 0.5, angle = 0,
+                                     margin = margin(0,0,0.5,0, unit = "pt" )),
+        axis.text.y  = element_text( face = "bold", size = 4, color = "black",
+                                     margin = margin(0.1,0.1,0,0, unit = "mm" ) ),
+        legend.position = "none",
+        axis.title.y = element_text( face = "bold", size = 4.2,
+                                     color = "black", 
+                                     margin = margin(0.1,0.5,0,1, unit = "mm" )),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.07),
+        panel.grid.major = element_line(color = "gray", size = 0.05),
+        panel.grid.minor = element_line(color = "gray89",size = 0.05),
+        axis.ticks = element_line(size = 0.05), axis.ticks.length = unit(0.4, "mm"),
+        plot.margin = unit(c(1,2,1,0), "lines")) +
+  geom_text(aes(x = 1.5, y = 21, label = "***"),
+            fontface = 3, size = 1.2, family = "serif", colour = "black" )
+
+
+# g.ids = c("AT3G22380", "AT2G25620","AT2G20370","AT4G25520","AT4G16155",
+#           "AT3G28380","AT1G16540","AT4G26080","AT3G19290","AT4G34000",
+#           "AT2G46830")
+# ABA_pathway_gene <- read.csv(file = "/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/ABA_pathway_gene.csv" ,head = TRUE)
+# DMGs_ABA_pathway_gene <- DMGs[ na.omit(match(as.character(ABA_pathway_gene$Gene_ID), names(DMGs)))]
+# names(DMGs_ABA_pathway_gene)
+
+AG = import("/data/TAIR10_gff3/Arabidopsis_thaliana.TAIR10.38.gtf.gz")
+gene = AG[ AG$type == "gene", c( "gene_id", "gene_biotype", "gene_name" ) ]
+gene = gene[ gene$gene_biotype == "protein_coding",
+             c( "gene_id", "gene_biotype", "gene_name" ) ]
+seqlevels(gene, pruning.mode = "coarse") <- c("1", "2", "3", "4", "5")
+seqlevels(gene)<- paste0("Chr", 1:5)
+gene = sortBySeqnameAndStart(gene)
+
+
+g.ids = c("AT3G22380", "AT2G25620","AT2G20370","AT4G25520","AT4G16155",
+          "AT3G28380","AT1G16540","AT4G26080","AT3G19290","AT4G34000",
+          "AT2G46830", "AT4G34460","AT1G48270","AT5G13630","AT5G51760",
+          "AT3G50500","AT1G18890","AT4G04740","AT2G43790","AT3G18040",
+          "AT2G17820","AT3G15730","AT3G03530","AT5G37500","AT5G55630",
+          "AT3G51860","AT2G18960","AT4G34000","AT3G19290","AT2G46510",
+          "AT2G22300","AT3G16940","AT1G24190","AT5G13530","AT2G13540",
+          "AT2G31660","AT1G55870","AT5G47100","AT4G04020")
+
+g.ids = unique(g.ids)
+
+alias = gene[match(g.ids, gene$gene_id)]$gene_name
+idx = which(is.na(alias))
+alias = alias[-idx]
+g.ids = g.ids[-idx]
+# idx = match(c("ABF3","ABF4","AIB","CHLH","PARN"),alias)
+# alias = alias[-idx]
+# g.ids = g.ids[-idx]
+dt = data.frame(gene.id = g.ids, alias = alias)
+dt = dt[order(dt$gene.id), ]
+#      gene.id     alias
+# 7  AT1G16540      SIR3
+# 17 AT1G18890     CPK10
+# 30 AT1G24190      SNL3
+# 13 AT1G48270      GCR1
+# 34 AT1G55870      PARN
+# 32 AT2G13540      ABH1
+# 21 AT2G17820      AHK1
+# 27 AT2G18960      AHA1
+# 3  AT2G20370      MUR3
+# 29 AT2G22300     CMTA3
+# 2  AT2G25620    AtDBP1
+# 33 AT2G31660      SAD2
+# 19 AT2G43790      MPK6
+# 28 AT2G46510       AIB
+# 11 AT2G46830      CCA1
+# 23 AT3G03530      NPC4
+# 22 AT3G15730 PLDALPHA1
+# 20 AT3G18040      MPK9
+# 9  AT3G19290      ABF4
+# 1  AT3G22380       TIC
+# 6  AT3G28380    ABCB17
+# 16 AT3G50500   SPK-2-2
+# 26 AT3G51860      CAX3
+# 36 AT4G04020      PAP1
+# 18 AT4G04740     CPK23
+# 5  AT4G16155      LPD2
+# 4  AT4G25520      SLK1
+# 8  AT4G26080      ABI1
+# 10 AT4G34000      ABF3
+# 12 AT4G34460       GB1
+# 31 AT5G13530       KEG
+# 14 AT5G13630      CHLH
+# 24 AT5G37500      GORK
+# 35 AT5G47100      CBL9
+# 15 AT5G51760      AHG1
+# 25 AT5G55630      TPK1
+tvd_dimps = getGRegionsStat(GR = DIMPs, grfeatures = DMGs, stat = "sum", 
+                            column = 7L, absolute = TRUE)
+tvd_dimps = uniqueGRanges(tvd_dimps)
+colnames(mcols(tvd_dimps)) <- c("CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+
+tvd_DIMPs = tvd_dimps[queryHits(Hits)]
+Hits = findOverlaps(tvd_dimps, DMGs)
+names(tvd_DIMPs) <- names(DMGs[subjectHits(Hits)])
+tvd_DIMPs = unique(tvd_DIMPs)
+
+idx = match(g.ids, names(tvd_DIMPs))
+tvd_genes = tvd_DIMPs[na.omit(idx)]
+alias = alias[!is.na(idx)]
+
+x = tvd_genes[, c("CTR1", "CTR2", "CTR3")]
+wt.tvd = rowMeans(as.matrix(mcols(x)))
+wt.tvd.sd = apply(as.matrix(mcols(x)), 1, sd)
+
+x = tvd_genes[, c("STR1", "STR2", "STR3")]
+ct.tvd = rowMeans(as.matrix(mcols(x)))
+ct.tvd.sd = apply(as.matrix(mcols(x)), 1, sd)
+
+group = factor(c(rep("ctrl", length(wt.tvd)), rep("treat", length(ct.tvd))), 
+               levels = c("ctrl", "treat"))
+tvd = data.frame(group = group, tvd = c(wt.tvd, ct.tvd),
+                 es = c(wt.tvd.sd, ct.tvd.sd)/sqrt(3),
+                 gene = c(alias,alias))
+
+p3 = ggplot(tvd, aes(x = gene, y = tvd, fill = group)) + 
+  geom_bar(stat="identity", position = position_dodge()) +
+  scale_fill_manual(values = c("forestgreen", "dodgerblue")) +
+  geom_errorbar(aes(ymin = tvd - es, ymax = tvd + es), width =.2,
+                position=position_dodge(.9), size = 0.1) +
+  ylab("Abs. meth-levels diff. sum") + #ggtitle("C") +
+  theme(axis.title.x =  element_blank(),
+        text = element_text(family = "serif"),
+        plot.title = element_text(face = "bold", hjust = -0.25, size = 4, 
+                                  margin = margin(t = 1, r = 4, b = 0, l = 0)), 
+        #axis.text.x  =  element_blank(),
+        axis.text.x  = element_text( face = "bold", size = 4, color = "black",
+                                     hjust = 0, vjust = 0.5, angle = -90,
+                                     margin = margin(0,0,0.5,0, unit = "pt" )),
+        axis.text.y  = element_text( face = "bold", size = 4, color = "black",
+                                     margin = margin(0.1,0.1,0,0, unit = "mm" ) ),
+        legend.position = "none",
+        axis.title.y = element_text( face = "bold", size = 4.2,
+                                     color = "black", 
+                                     margin = margin(0.1,0.5,0,1, unit = "mm" )),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.07),
+        panel.grid.major = element_line(color = "gray", size = 0.05),
+        panel.grid.minor = element_line(color = "gray89",size = 0.05),
+        axis.ticks = element_line(size = 0.05), axis.ticks.length = unit(0.4, "mm"),
+        plot.margin = unit(c(1,2,1,0), "lines"))
+
+
+hd_dimps = getGRegionsStat(GR = DIMPs, grfeatures = DMGs, stat = "sum", 
+                           column = 9L)
+
+hd_dimps = uniqueGRanges(hd_dimps)
+colnames(mcols(hd_dimps)) <- c("CTR1", "CTR2", "CTR3", "STR1", "STR2", "STR3")
+
+Hits = findOverlaps(hd_dimps, DMGs)
+hd_DIMPs = hd_dimps[queryHits(Hits)]
+names(hd_DIMPs) <- names(DMGs[subjectHits(Hits)])
+hd_DIMPs = unique(hd_DIMPs)
+
+idx = match(g.ids, names(hd_DIMPs))
+hd_genes = hd_DIMPs[na.omit(idx)]
+# alias = alias[!is.na(idx)]
+
+x = hd_genes[, c("CTR1", "CTR2", "CTR3")]
+wt.hd = rowMeans(as.matrix(mcols(x)))
+wt.hd.sd = apply(as.matrix(mcols(x)), 1, sd)
+
+x = hd_genes[, c("STR1", "STR2", "STR3")]
+ct.hd = rowMeans(as.matrix(mcols(x)))
+ct.hd.sd = apply(as.matrix(mcols(x)), 1, sd)
+
+group = factor(c(rep("ctrl", length(wt.hd)), rep("treat", length(ct.hd))), 
+               levels = c("ctrl", "treat"))
+hd.df = data.frame(group = group, hd = c(wt.hd, ct.hd),
+                   es = c(wt.hd.sd, ct.hd.sd)/sqrt(3),
+                   gene = c(alias,alias))
+
+p4 = ggplot(hd.df, aes(x = gene, y = hd, fill = group)) + 
+  geom_bar(stat="identity", position = position_dodge()) +
+  scale_fill_manual(values = c("forestgreen", "dodgerblue")) +
+  geom_errorbar(aes(ymin = hd - es, ymax = hd + es), width =.2,
+                position=position_dodge(.9), size = 0.1) +
+  ylab("Hellinger divergence sum") + #ggtitle("D") +
+  theme(axis.title.x =  element_blank(),
+        text = element_text(family = "serif"),
+        plot.title = element_text(face = "bold", hjust = -0.25, size = 4, 
+                                  margin = margin(t = 1, r = 4, b = 0, l = 0)), 
+        #axis.text.x  =  element_blank(),
+        axis.text.x  = element_text( face = "bold", size = 4, color = "black",
+                                     hjust = 0, vjust = 0.5, angle = -90,
+                                     margin = margin(0,0,0.5,0, unit = "pt" )),
+        axis.text.y  = element_text( face = "bold", size = 4, color = "black",
+                                     margin = margin(0.1,0.1,0,0, unit = "mm" ) ),
+        legend.position = "none",
+        axis.title.y = element_text( face = "bold", size = 4.2,
+                                     color = "black", 
+                                     margin = margin(0.1,0.5,0,1, unit = "mm" )),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.07),
+        panel.grid.major = element_line(color = "gray", size = 0.05),
+        panel.grid.minor = element_line(color = "gray89",size = 0.05),
+        axis.ticks = element_line(size = 0.05), axis.ticks.length = unit(0.4, "mm"),
+        plot.margin = unit(c(1,2,1,0), "lines"))
+
+
+tiff(file = "./boxplot_tvd-sum_hd-sum_drought-exp_09_06_18.tif",
+     width = 3500, height = 2500, res = 900, pointsize = 1, compression = "lzw" )
+marrangeGrob( list(p1, p3, p2, p4), nrow = 2, ncol = 2,
+              widths = c(2.6,2.6), padding = unit(0, "mm"), top = NULL )
+dev.off()
