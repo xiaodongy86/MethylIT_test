@@ -1,0 +1,629 @@
+# =========================================================== #
+#
+# ================= Heatmap Drougth Experiment ============
+#
+# =========================================================== #
+library(MethylIT)
+setwd("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/heatmaps")
+
+
+#setwd("~/memory_graph_5_4_2018/heatmap")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DIMPs_CG_mitotic_drougth_exp_cut1.2.RData")
+
+DIMPs.CG
+# ============================================================ #
+# =================== Methylation levels ===================== #
+# ============================================================ #
+
+########## for CG context ########
+LR = getGRegionsStat(GR = HD_ml_CG, win.size = 2000, step.size = 2000,
+                     stat = "sum", column = c(3,4), prob = TRUE)
+GR = uniqueGRanges(LR, type = "equal")
+colnames(mcols(GR)) <- names(LR)
+
+bar.palette <- colorRampPalette(c(rep("cyan",2), rep("green", 1),rep("yellow", 5), 
+                                  rep("red", 4), rep("darkblue", 2), rep("black",1)),
+                                bias = 0.6, space = "rgb")
+
+bar.palette_1 <- colorRampPalette(c(rep("#ffffcc",2), rep("#c7e9b4",1),rep("#7fcdbb", 3), 
+                                  rep("#41b6c4", 4), rep("#2c7fb8", 2), rep("#253494",2)),
+                                bias = 0.8, space = "rgb")
+
+
+k = "Chr1"
+file = "./heatmap_All_CG_Percentage_Chr1"
+xlab = "Chromosome 1"
+heatmapChr(GR = GR, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_1, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )  
+
+
+################# For CHG context ##################
+LR_CHG = getGRegionsStat(GR = DIMPs_CHG, win.size = 2000, step.size = 2000,
+                     stat = "sum", column = c(3,4), prob = TRUE)
+GR_CHG = uniqueGRanges(LR_CHG, type = "equal")
+colnames(mcols(GR_CHG)) <- names(LR_CHG)
+bar.palette_1 <- colorRampPalette(c(rep("#ffffcc",2), rep("#c7e9b4",1),rep("#7fcdbb", 3), 
+                                    rep("#41b6c4", 4), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 0.8, space = "rgb")
+
+k = "Chr5"
+file = "./heatmap_CHG_Percentage_Chr5"
+xlab = "Chromosome 5"
+heatmapChr(GR = GR_CHG, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_1, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+
+################# For CHH context ##################
+
+LR_CHH = getGRegionsStat(GR = DIMPs_CHH, win.size = 2000, step.size = 2000,
+                         stat = "sum", column = c(3,4), prob = TRUE)
+GR_CHH = uniqueGRanges(LR_CHH, type = "equal")
+colnames(mcols(GR_CHH)) <- names(LR_CHH)
+bar.palette_1 <- colorRampPalette(c(rep("#ffffcc",2), rep("#c7e9b4",1),rep("#7fcdbb", 3), 
+                                    rep("#41b6c4", 4), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 0.8, space = "rgb")
+
+k = "Chr5"
+file = "./heatmap_CHH_Percentage_Chr5"
+xlab = "Chromosome 5"
+heatmapChr(GR = GR_CHH, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_1, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+
+# ============================================================ #
+# =================== Methylation TV  for all positions ===================== #
+# ============================================================ #
+
+####=======================================================#
+#                        for  CG  (Robersy)    
+#==========================================================
+library(MethylIT)
+library(rtracklayer)
+# load("~/HD_ml_CG_cov4_sum.RData")
+# load("~/HD_ml_CHG_cov4_sum.RData")
+# load("~/HD_ml_CHH_cov4_sum.RData")
+
+#load("/data2/FCHLFGMCCXY_L4_ARAkxqHAABCAAA/cdts-wh.genomics.cn/Upload_06132018/cov/Gen_1/M_vs_NM_DIMPs_DIMR_DMGs.RData")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/DIMPs_CG_mitotic_drougth_exp_cut1.2.RData")
+load("/data/users/xzy50/GSE94075/ControlAsReference/Mitotic/HD_CG_sum_cov10.RData")
+# AG = import("/data/TAIR10_gff3/Arabidopsis_thaliana.TAIR10.38.gtf.gz")
+# seqlevels(AG, pruning.mode = "coarse") <- paste0(1:5)
+
+##########         Methylation level               ######################
+LR = getGRegionsStat(GR = DIMPs.CG, win.size = 2000, step.size = 2000,
+                     stat = "sum", column = c(3,4), prob = TRUE)
+
+LR = getGRegionsStat(GR = HD_CG, win.size = 2000, step.size = 2000,
+                     stat = "sum", column = c(3,4), prob = TRUE)
+
+GR = uniqueGRanges(LR, type = "equal", chromosomes = "Chr1")
+colnames(mcols(GR)) <- names(LR)
+
+bar.palette <- colorRampPalette(c(rep("cyan",2), rep("green", 2),rep("yellow", 1),
+                                  rep("red", 1), rep("darkblue", 1)),
+                                bias = 2, space = "rgb")
+
+bar.palette <- colorRampPalette(c(rep("white",2), rep("lightgreen", 2),rep("yellow", 1),
+                                  rep("red", 1),  rep("darkblue", 1)),
+                                bias = 2, space = "rgb")
+
+
+
+k = "Chr1"
+file = paste0("./heatmap_allposition_CG_Methylation_level_1", k)
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR, filename = file, format = "tiff", chr = k, xtitle = xlab, 
+           Barpalette = bar.palette, mar = c(15, 30, 0, 0) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.bar.lab = 6, lwd = 0.1, 
+           cex.lab = 6, mar.scale = c(15, 20, 0.5, 4), mgp = c(3,1,0), line.xtitle = 14,
+           pointsize = 1, cex.xaxis = 6, cex.yaxis = 6, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1, 0), col.bar.lwd = 0.1,
+           cex.xtitle = 7)
+
+
+
+#############                    TVD                #######################
+LR_TVD = getGRegionsStat(GR = HD_CG, win.size = 2000, step.size = 2000,
+                      stat = "sum", column = 7L, absolute = TRUE)
+GR_TVD = uniqueGRanges(LR_TVD, type = "equal", chromosomes = "Chr1")
+colnames(mcols(GR_TVD)) <- names(LR_TVD)
+
+
+
+bar.palette <- colorRampPalette(c(rep("white",1), rep("lightgreen", 1),rep("yellow", 1),
+                                  rep("red", 1), rep("darkblue", 1), rep("black",1)),
+                                bias = 2, space = "rgb")
+
+
+k = "Chr1"
+file = paste0("./heatmap_allposition_CG_TVD_1_", k)
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD, filename = file, format = "tiff", chr = k, xtitle = xlab, 
+           Barpalette = bar.palette, mar = c(15, 30, 0, 0) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.bar.lab = 6, lwd = 0.1, 
+           cex.lab = 6, mar.scale = c(15, 20, 0.5, 4), mgp = c(3,1,0), line.xtitle = 14,
+           pointsize = 1, cex.xaxis = 6, cex.yaxis = 6, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1, 0), col.bar.lwd = 0.1,
+           cex.xtitle = 7)
+
+
+
+###############                 HD                 ########################
+
+
+LR_HD = getGRegionsStat(GR = HD_CG, win.size = 2000, step.size = 2000,
+                         stat = "sum", column = 9L, absolute = TRUE)
+
+GR_HD = uniqueGRanges(LR_HD, type = "equal", chromosomes = "Chr1")
+colnames(mcols(GR_HD)) <- names(LR_HD)
+# For HD
+bar.palette <- colorRampPalette(c(rep("white",1),rep("cyan",3), rep("green", 1),rep("yellow", 2),
+                                  rep("red", 2), rep("darkblue", 5), rep("black",5)),
+                                bias = 2, space = "rgb")
+
+bar.palette <- colorRampPalette(c(rep("white",4),rep("lightgreen", 1),rep("yellow", 3),
+                                  rep("red", 5), rep("darkblue", 5), rep("black",5)),
+                                bias = 2, space = "rgb")
+
+
+k = "Chr1"
+file = paste0("./heatmap_allposition_CG_HD_1_", k)
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_HD, filename = file, format = "tiff", chr = k, xtitle = xlab, 
+           Barpalette = bar.palette, mar = c(15, 30, 0, 0) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.bar.lab = 6, lwd = 0.1, 
+           cex.lab = 6, mar.scale = c(15, 20, 0.5, 4), mgp = c(3,1,0), line.xtitle = 14,
+           pointsize = 1, cex.xaxis = 6, cex.yaxis = 6, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1, 0), col.bar.lwd = 0.1,
+           cex.xtitle = 7)
+
+
+
+####=======================================================#
+#                        for  CHG      
+#==========================================================
+
+LR_TVD_CHG = getGRegionsStat(GR = HD_ml_CHG, win.size = 2000, step.size = 2000,
+                         stat = "sum", column = 7L, absolute = TRUE)
+GR_TVD_CHG = uniqueGRanges(LR_TVD_CHG, type = "equal")
+colnames(mcols(GR_TVD_CHG)) <- names(LR_TVD_CHG)
+
+bar.palette_2 <- colorRampPalette(c(rep("#ffffcc",5), rep("#c7e9b4",2),rep("#7fcdbb", 2), 
+                                    rep("#41b6c4", 2), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 2.0, space = "rgb")
+k = "Chr1"
+file = "./heatmap_All_CHG_TVD_Chr1"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr2"
+file = "./heatmap_All_CHG_TVD_Chr2"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr3"
+file = "./heatmap_All_CHG_TVD_Chr3"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr4"
+file = "./heatmap_All_CHG_TVD_Chr4"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr5"
+file = "./heatmap_All_CHG_TVD_Chr5"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+
+
+####=======================================================#
+#                        for  CHH      
+#==========================================================
+LR_TVD_CHH = getGRegionsStat(GR = HD_ml_CHH, win.size = 2000, step.size = 2000,
+                             stat = "sum", column = 7L, absolute = TRUE)
+GR_TVD_CHH = uniqueGRanges(LR_TVD_CHH, type = "equal")
+colnames(mcols(GR_TVD_CHH)) <- names(LR_TVD_CHH)
+
+bar.palette_2 <- colorRampPalette(c(rep("#ffffcc",5), rep("#c7e9b4",2),rep("#7fcdbb", 2), 
+                                    rep("#41b6c4", 2), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 2.0, space = "rgb")
+k = "Chr1"
+file = "./heatmap_All_CHH_TVD_Chr1"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr2"
+file = "./heatmap_All_CHH_TVD_Chr2"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr3"
+file = "./heatmap_All_CHH_TVD_Chr3"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr4"
+file = "./heatmap_All_CHH_TVD_Chr4"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr5"
+file = "./heatmap_All_CHH_TVD_Chr5"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+# ============================================================ #
+# =================== Methylation TV  for DIMPs ============== #
+# ============================================================ #
+
+LR_TVD_DIMP = getGRegionsStat(GR = DIMPs_CG, win.size = 2000, step.size = 2000,
+                         stat = "sum", column = 7L, absolute = TRUE)
+GR_TVD_DIMP = uniqueGRanges(LR_TVD_DIMP, type = "equal")
+colnames(mcols(GR_TVD_DIMP)) <- names(LR_TVD_DIMP)
+
+# bar.palette <- colorRampPalette(c(rep("cyan",2), rep("green", 1),rep("yellow", 5), 
+#                                   rep("red", 4), rep("darkblue", 2), rep("black",1)),
+#                                 bias = 0.6, space = "rgb")
+
+bar.palette_1 <- colorRampPalette(c(rep("#ffffcc",4), rep("#c7e9b4",1),rep("#7fcdbb", 3), 
+                                    rep("#41b6c4", 3), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 1.8, space = "rgb")
+
+bar.palette_2 <- colorRampPalette(c(rep("#ffffcc",5), rep("#c7e9b4",2),rep("#7fcdbb", 2), 
+                                    rep("#41b6c4", 2), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 2.0, space = "rgb")
+k = "Chr1"
+file = "./heatmap_DIMPs_CG_TVD_Chr1"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr2"
+file = "./heatmap_DIMPs_CG_TVD_Chr2"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr3"
+file = "./heatmap_DIMPs_CG_TVD_Chr3"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr4"
+file = "./heatmap_DIMPs_CG_TVD_Chr4"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr5"
+file = "./heatmap_DIMPs_CG_TVD_Chr5"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+####=======================================================#
+#                        for  CHG      
+#==========================================================
+
+LR_TVD_CHG_DIMP = getGRegionsStat(GR = DIMPs_CHG, win.size = 2000, step.size = 2000,
+                             stat = "sum", column = 7L, absolute = TRUE)
+GR_TVD_CHG_DIMP = uniqueGRanges(LR_TVD_CHG_DIMP, type = "equal")
+colnames(mcols(GR_TVD_CHG_DIMP)) <- names(LR_TVD_CHG_DIMP)
+
+bar.palette_2 <- colorRampPalette(c(rep("#ffffcc",5), rep("#c7e9b4",2),rep("#7fcdbb", 2), 
+                                    rep("#41b6c4", 2), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 2.0, space = "rgb")
+k = "Chr1"
+file = "./heatmap_DIMP_CHG_TVD_Chr1"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr2"
+file = "./heatmap_DIMP_CHG_TVD_Chr2"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr3"
+file = "./heatmap_DIMP_CHG_TVD_Chr3"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr4"
+file = "./heatmap_DIMP_CHG_TVD_Chr4"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr5"
+file = "./heatmap_DIMP_CHG_TVD_Chr5"
+xlab = paste0("CHG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHG_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+####=======================================================#
+#                        for  CHH      
+#==========================================================
+LR_TVD_CHH_DIMP = getGRegionsStat(GR = DIMPs_CHH, win.size = 2000, step.size = 2000,
+                             stat = "sum", column = 7L, absolute = TRUE)
+GR_TVD_CHH_DIMP = uniqueGRanges(LR_TVD_CHH_DIMP, type = "equal")
+colnames(mcols(GR_TVD_CHH_DIMP)) <- names(LR_TVD_CHH_DIMP)
+
+bar.palette_2 <- colorRampPalette(c(rep("#ffffcc",5), rep("#c7e9b4",2),rep("#7fcdbb", 2), 
+                                    rep("#41b6c4", 2), rep("#2c7fb8", 2), rep("#253494",2)),
+                                  bias = 2.0, space = "rgb")
+k = "Chr1"
+file = "./heatmap_DIMP_CHH_TVD_Chr1"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr2"
+file = "./heatmap_DIMP_CHH_TVD_Chr2"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr3"
+file = "./heatmap_DIMP_CHH_TVD_Chr3"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr4"
+file = "./heatmap_DIMP_CHH_TVD_Chr4"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr5"
+file = "./heatmap_DIMP_CHH_TVD_Chr5"
+xlab = paste0("CHH. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TVD_CHH_DIMP, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+#=======================   Try bidirectional (TV)
+LR_TV = getGRegionsStat(GR = HD_ml_CG, win.size = 2000, step.size = 2000,
+                         stat = "sum", column = 7L, absolute = F)
+GR_TV = uniqueGRanges(LR_TV, type = "equal")
+colnames(mcols(GR_TV)) <- names(LR_TV)
+
+# bar.palette <- colorRampPalette(c(rep("cyan",2), rep("green", 1),rep("yellow", 5), 
+#                                   rep("red", 4), rep("darkblue", 2), rep("black",1)),
+#                                 bias = 0.6, space = "rgb")
+
+# bar.palette_1 <- colorRampPalette(c(rep("#ffffcc",4), rep("#c7e9b4",1),rep("#7fcdbb", 3), 
+#                                     rep("#41b6c4", 3), rep("#2c7fb8", 2), rep("#253494",2)),
+#                                   bias = 1.8, space = "rgb")
+# 
+# bar.palette_2 <- colorRampPalette(c(rep("#ffffcc",5), rep("#c7e9b4",2),rep("#7fcdbb", 2), 
+#                                     rep("#41b6c4", 2), rep("#2c7fb8", 2), rep("#253494",2)),
+#                                   bias = 2.0, space = "rgb")
+
+bar.palette_TV <- colorRampPalette(c(rep("#3288bd",2), rep("#99d594",2),rep("#ffffff", 3), 
+                                    rep("#fee08b", 2), rep("#fc8d59", 4), rep("#d53e4f",4)),
+                                  bias = 0.4, space = "rgb")
+k = "Chr1"
+file = "./heatmap_All_CG_TV_Chr1"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TV, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_TV, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr2"
+file = "./heatmap_All_CG_TV_Chr2"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TV, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr3"
+file = "./heatmap_All_CG_TV_Chr3"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TV, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+k = "Chr4"
+file = "./heatmap_All_CG_TV_Chr4"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TV, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+
+k = "Chr5"
+file = "./heatmap_All_CG_TV_Chr5"
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR_TV, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette_2, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
+
+
+# ======================================================== #
+# ==== Get sum of Hellinger divergence at gene regions ====
+# ======================================================== #
+# Gene Annotation 
+load("HD_CG_sum_cov10.RData")
+AG = import("~/Arabidopsis_thaliana.TAIR10.38.gtf.gz")
+seqlevels(AG, pruning.mode = "coarse") <- paste0(1:5)
+seqlevels(AG) <- c("Chr1", "Chr2", "Chr3", "Chr4", "Chr5")
+gene = AG[ which( AG$type == "gene" & AG$gene_biotype == "protein_coding" ), ]
+
+# To get the Region statisitic values 
+DIMRs_hd = getGRegionsStat(GR = HD_CG, grfeatures = gene,
+                           column = 9)
+
+
+# To load memory hd data
+
+
+# To build a matrix with the statistic values that will be found the metacolumns 
+# form a GRanges object
+
+LR_HD_CG = getGRegionsStat(GR = HD_ml_CG, win.size = 2000, step.size = 2000,
+                     stat = "sum", column = 9L)
+GR_HD_CG = uniqueGRanges(LR_HD_CG, type = "equal")
+colnames(mcols(GR_HD_CG)) <- names(LR_HD_CG)
+
+
+bar.palette <- colorRampPalette(c(rep("cyan",3), "green",rep("yellow", 3), "orange",
+                                  rep("red", 6),rep("darkblue", 3), "black"),
+                                bias = 1.1, space = "rgb")
+
+bar.palette <- colorRampPalette(c(rep("cyan",2), "green",rep("yellow", 1), 
+                                  rep("red", 8), rep("darkblue", 8), rep("black",2)),
+                                bias = 1.2, space = "rgb")
+
+k = "Chr3"
+file = paste0("./heatmaps/all_CGs/heatmap_CG_HD_drougth_mitotic_test_", k,
+              "_", format(Sys.time(), '%d %B %Y'))
+xlab = paste0("CG. Chromosome ", sub("Chr", "", k), " (Mbp)")
+heatmapChr(GR = GR, filename = file, format = "tiff", chr = k, xlab = xlab, 
+           Barpalette = bar.palette, mar = c(4, 5, 0, -0.5) + 0.5, res = 600, 
+           font = 2, family = "sans", las = 1, cex.scale = 2, lwd = 0.1, 
+           cex.lab = 2.5, mar.scale = c(4, 6, 0.5, 1), mgp = c(3,1,0),
+           pointsize = 2, cex.xaxis = 2, cex.yaxis = 2, xaxis.adj = c(0.5, 0.7),
+           lwd.ticks = 0.1, mgp.scale = c(3, 1.1, 0), col.bar.lwd = 0.1 )
